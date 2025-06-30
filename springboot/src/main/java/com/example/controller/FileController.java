@@ -38,7 +38,7 @@ public class FileController {
         String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();  // 文件的原始名称
         // 写入文件
         FileUtil.writeBytes(bytes, filePath + fileName);
-        String url = "http://localhost:9999/files/download/" + fileName;
+        String url = "http://localhost:9991/files/download/" + fileName;
         return R.success(url);
     }
 

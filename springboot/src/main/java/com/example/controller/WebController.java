@@ -7,6 +7,7 @@ import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.service.impl.AdminServiceImpl;
 import com.example.service.impl.UserServiceImpl;
+import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -43,12 +44,16 @@ public class WebController {
     }
 
     @PostMapping("/register")
+    @AuditLogRecord(action = "用户注册", resource = "用户")
+    @ApiOperation("用户注册")
     public R register(@RequestBody User user) {
         userServiceImpl.register(user);
         return R.ok();
     }
 
+    @ApiOperation("更新密码")
     @PostMapping("/updatePassword")
+    @AuditLogRecord(action = "更新密码", resource = "用户")
     public R UpdatePassword(@RequestBody Account account) {
         if("ADMIN".equals(account.getRole())){
             adminServiceImpl.updatePassword(account);

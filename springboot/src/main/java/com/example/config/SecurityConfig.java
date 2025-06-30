@@ -12,35 +12,43 @@ import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
+import java.util.List;
+
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
     @Resource
-    JwtAuthenticationFilter jwtAuthenticationFilter;
+    private JwtAuthenticationFilter jwtAuthenticationFilter;
+
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-        http.cors() // 开启 CORS 支持
+        http
+                .cors()
                 .and()
-                .csrf().disable() // 禁用 CSRF
+                .csrf().disable()
                 .authorizeHttpRequests()
-                .requestMatchers("/files/download/**","/files/upload/**","/login", "/register").permitAll() // 放行登录、注册接口
+                .requestMatchers(
+                        "/login", "/register",
+                        "/files/upload/**", "/files/download/**",
+                        "/favicon.ico"
+                ).permitAll()
                 .anyRequest().authenticated()
                 .and()
-                .formLogin().disable(); // 如果你不用 Spring 的默认登录页
-        // 注册 JWT 过滤器在 UsernamePasswordAuthenticationFilter 之前
+                .formLogin().disable();
+
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // CORS 配置来源
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        config.setAllowCredentials(true); // 允许携带 cookie
-        config.addAllowedOriginPattern("*"); // 或者指定前端地址 http://localhost:5173
-        config.addAllowedHeader("*");
-        config.addAllowedMethod("*");
+        config.setAllowCredentials(true);
+        config.addAllowedOriginPattern("*");  // 建议部署后改成实际域名
+        config.setAllowedHeaders(List.of("*"));
+//        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        config.setAllowedMethods(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
         source.registerCorsConfiguration("/**", config);

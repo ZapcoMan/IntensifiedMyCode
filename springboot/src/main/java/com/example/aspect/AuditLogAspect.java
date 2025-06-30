@@ -1,11 +1,14 @@
 package com.example.aspect;
 
 import com.example.annotation.AuditLogRecord;
+import com.example.controller.NotificationController;
 import com.example.entity.AuditLog;
 import com.example.service.AuditLogService;
 
 
 import jakarta.annotation.Resource;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
@@ -22,7 +25,7 @@ import java.util.Arrays;
 @Aspect
 @Component
 public class AuditLogAspect {
-
+    private static final Log log = LogFactory.getLog(AuditLogAspect.class);
     @Resource
     private AuditLogService auditLogService;
 

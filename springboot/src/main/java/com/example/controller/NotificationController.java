@@ -12,7 +12,7 @@ import org.apache.commons.logging.LogFactory;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/notification")
+@RequestMapping("/notification")
 public class NotificationController {
     private static final Log log = LogFactory.getLog(NotificationController.class);
 

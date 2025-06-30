@@ -24,7 +24,7 @@ public class UserAccountServiceImpl implements AccountService {
 
     @Override
     public Account selectById(String id) {
-        return null;
+        return userService.selectById(id);
     }
 
     @Override

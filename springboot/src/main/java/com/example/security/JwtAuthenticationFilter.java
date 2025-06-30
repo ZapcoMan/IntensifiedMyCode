@@ -6,9 +6,7 @@ import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.entity.Account;
 import com.example.exception.CustomerException;
-import com.example.service.impl.AdminServiceImpl;
-import com.example.service.impl.UserServiceImpl;
-import jakarta.annotation.Resource;
+import com.example.service.AccountService;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -20,26 +18,25 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    @Resource
-    AdminServiceImpl adminServiceImpl;
-    @Resource
-    UserServiceImpl userServiceImpl;
+    // 用于存储 role -> 对应的 AccountService 实现类
+    private final Map<String, AccountService> serviceMap = new HashMap<>();
 
     @Override
-    protected void doFilterInternal(HttpServletRequest request,
-                                    HttpServletResponse response,
-                                    FilterChain filterChain)
-            throws ServletException, IOException {
+    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
 
+        // 从请求头或请求参数中获取 token
         String token = request.getHeader("token");
         if (StrUtil.isEmpty(token)) {
             token = request.getParameter("token");
         }
 
+        // 如果 token 为空，则继续执行过滤器链并返回
         if (StrUtil.isBlank(token)) {
             filterChain.doFilter(request, response);
             return;
@@ -47,21 +44,34 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         Account account = null;
         try {
+            // 解析 token 获取 audience 字段，并分割出用户ID和角色
             String audience = JWT.decode(token).getAudience().get(0);
             String[] split = audience.split("-");
             String userId = split[0];
             String role = split[1];
 
-            if ("ADMIN".equals(role)) {
-                account = adminServiceImpl.selectById(userId);
-            } else if ("USER".equals(role)) {
-                account = userServiceImpl.selectById(userId);
-            }
+            // 根据角色获取对应的 AccountService 实现类
+            AccountService service = serviceMap.get(role);
+            if (service == null) throw new CustomerException("401", "不支持的角色");
 
+            // 使用 AccountService 查询用户信息
+            account = service.selectById(userId);
+
+            // 如果用户不存在，抛出异常
             if (account == null) {
                 throw new CustomerException("401", "用户不存在");
             }
 
+            // 创建 JWT 验证器，验证 token 的签名
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
+            verifier.verify(token);
+
+            // 再次检查用户是否存在（防止在验证过程中用户被删除）
+            if (account == null) {
+                throw new CustomerException("401", "用户不存在");
+            }
+
+            // 再次创建 JWT 验证器，验证 token 的签名（可能是为了确保验证过程的可靠性）
             JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
             jwtVerifier.verify(token);
 
@@ -75,6 +85,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
         }
 
         filterChain.doFilter(request, response);
+
     }
 }
 

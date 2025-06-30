@@ -1,6 +1,7 @@
 package com.example.controller;
 
 
+import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
 
 import com.example.entity.Notification;
@@ -20,7 +21,7 @@ public class NotificationController {
     private NotificationService notificationService;
 
     @ApiOperation("发送通知")
-
+    @AuditLogRecord(action = "发送通知", resource = "通知")
     @PostMapping("/send")
     public R  sendNotification(@RequestBody Notification notification) {
         log.info("发送通知");
@@ -29,7 +30,7 @@ public class NotificationController {
     }
 
     @ApiOperation("获取用户通知")
-
+    @AuditLogRecord(action = "获取用户通知", resource = "通知")
     @GetMapping("/user/{userId}")
     public R getUserNotifications(@PathVariable Long userId) {
         log.info("获取用户通知");
@@ -37,7 +38,7 @@ public class NotificationController {
     }
 
     @ApiOperation("标记通知为已读")
-
+    @AuditLogRecord(action = "标记通知为已读", resource = "通知")
     @PostMapping("/{id}/read")
     public R markAsRead(@PathVariable Long id) {
         notificationService.markAsRead(id);
@@ -45,7 +46,7 @@ public class NotificationController {
     }
 
     @ApiOperation("删除通知")
-
+    @AuditLogRecord(action = "删除通知", resource = "通知")
     @DeleteMapping("/{id}")
     public R delete(@PathVariable Long id) {
         notificationService.deleteNotification(id);

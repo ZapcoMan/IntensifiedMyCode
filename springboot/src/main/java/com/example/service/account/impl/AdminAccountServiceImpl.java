@@ -6,7 +6,6 @@ import com.example.enums.RoleEnum;
 import com.example.mapper.AdminMapper;
 import com.example.service.AccountService;
 import com.example.service.AdminService;
-import com.example.service.impl.AdminServiceImpl;
 import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 

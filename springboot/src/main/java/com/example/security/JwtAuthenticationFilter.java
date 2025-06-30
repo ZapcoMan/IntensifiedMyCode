@@ -7,6 +7,8 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.entity.Account;
 import com.example.exception.CustomerException;
 import com.example.service.AccountService;
+import jakarta.annotation.PostConstruct;
+import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -17,75 +19,73 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.*;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    // 用于存储 role -> 对应的 AccountService 实现类
+    @Resource
+    private List<AccountService> accountServices;
+
     private final Map<String, AccountService> serviceMap = new HashMap<>();
 
-    @Override
-    protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+    private final static List<String> WHITE_LIST = Arrays.asList(
+            "/login", "/register",
+            "/files/upload", "/files/download", "/favicon.ico"
+    );
 
-        // 从请求头或请求参数中获取 token
+    @PostConstruct
+    public void initMap() {
+        for (AccountService service : accountServices) {
+            serviceMap.put(service.getRole().getCode(), service);
+        }
+    }
+
+    @Override
+    protected void doFilterInternal(HttpServletRequest request,
+                                    HttpServletResponse response,
+                                    FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String uri = request.getRequestURI();
+        for (String white : WHITE_LIST) {
+            if (uri.startsWith(white)) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+        }
+
         String token = request.getHeader("token");
         if (StrUtil.isEmpty(token)) {
             token = request.getParameter("token");
         }
 
-        // 如果 token 为空，则继续执行过滤器链并返回
         if (StrUtil.isBlank(token)) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        Account account = null;
         try {
-            // 解析 token 获取 audience 字段，并分割出用户ID和角色
-            String audience = JWT.decode(token).getAudience().get(0);
-            String[] split = audience.split("-");
+            String[] split = JWT.decode(token).getAudience().get(0).split("-");
             String userId = split[0];
             String role = split[1];
-
-            // 根据角色获取对应的 AccountService 实现类
             AccountService service = serviceMap.get(role);
-            if (service == null) throw new CustomerException("401", "不支持的角色");
+            if (service == null) throw new CustomerException("401", "非法角色");
 
-            // 使用 AccountService 查询用户信息
-            account = service.selectById(userId);
+            Account account = service.selectById(userId);
+            if (account == null) throw new CustomerException("401", "用户不存在");
 
-            // 如果用户不存在，抛出异常
-            if (account == null) {
-                throw new CustomerException("401", "用户不存在");
-            }
-
-            // 创建 JWT 验证器，验证 token 的签名
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
             verifier.verify(token);
 
-            // 再次检查用户是否存在（防止在验证过程中用户被删除）
-            if (account == null) {
-                throw new CustomerException("401", "用户不存在");
-            }
-
-            // 再次创建 JWT 验证器，验证 token 的签名（可能是为了确保验证过程的可靠性）
-            JWTVerifier jwtVerifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
-            jwtVerifier.verify(token);
-
-            // ✅ 设置认证信息进 SecurityContext
-            UsernamePasswordAuthenticationToken authenticationToken =
+            UsernamePasswordAuthenticationToken authToken =
                     new UsernamePasswordAuthenticationToken(account.getUsername(), null, Collections.emptyList());
-            SecurityContextHolder.getContext().setAuthentication(authenticationToken);
+            SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        } catch (Exception e) {
-            // token 无效，不设置认证，继续走匿名流程
+        } catch (Exception ignored) {
         }
 
         filterChain.doFilter(request, response);
-
     }
 }
 

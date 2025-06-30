@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .and()
                 .csrf().disable() // 禁用 CSRF
                 .authorizeHttpRequests()
-                .requestMatchers("/login", "/register").permitAll() // 放行登录、注册接口
+                .requestMatchers("/files/download/**","/files/upload/**","/login", "/register").permitAll() // 放行登录、注册接口
                 .anyRequest().authenticated()
                 .and()
                 .formLogin().disable(); // 如果你不用 Spring 的默认登录页

@@ -4,6 +4,7 @@ package com.example.service.impl;
 import com.example.entity.Account;
 import com.example.service.QrCodeLoginService;
 import jakarta.annotation.Resource;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Service;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -18,7 +19,7 @@ public class QrCodeLoginServiceImpl implements QrCodeLoginService {
     private static final int EXPIRE_SECONDS = 300;
 
     @Resource
-    private StringRedisTemplate redisTemplate;
+    private RedisTemplate<String, String> redisTemplate;
 
     @Resource
     private ObjectMapper objectMapper;

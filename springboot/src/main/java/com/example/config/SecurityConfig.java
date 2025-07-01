@@ -37,7 +37,7 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/login", "/register",
                         "/files/upload/**", "/files/download/**",
-                        "/favicon.ico"
+                        "/favicon.ico","qrcode/**"
                 ).permitAll()
                 .anyRequest().authenticated()
                 .and()

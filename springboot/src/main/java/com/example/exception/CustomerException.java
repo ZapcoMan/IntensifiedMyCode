@@ -4,10 +4,7 @@ import com.example.common.ResultCodeEnum;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 
-/**
- * 自定义异常
- * 运行时异常
- */
+
 /**
  * 自定义客户异常类，继承自RuntimeException
  * 用于处理客户相关的异常情况，提供异常代码和消息的封装

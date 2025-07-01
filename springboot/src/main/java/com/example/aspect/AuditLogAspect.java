@@ -22,10 +22,14 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
 
+// 定义一个切面类，用于处理审计日志
 @Aspect
 @Component
 public class AuditLogAspect {
+    // 日志对象，用于记录审计日志方面的信息
     private static final Log log = LogFactory.getLog(AuditLogAspect.class);
+
+    // 注入审计日志服务，用于保存审计日志
     @Resource
     private AuditLogService auditLogService;
 
@@ -47,6 +51,7 @@ public class AuditLogAspect {
                 : "unknown";
 
         try {
+            // 执行被拦截的方法
             result = joinPoint.proceed();
             return result;
         } finally {
@@ -66,4 +71,5 @@ public class AuditLogAspect {
             auditLogService.saveLog(log);
         }
     }
+
 }

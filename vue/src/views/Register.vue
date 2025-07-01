@@ -13,7 +13,7 @@
           <el-input size="large" show-password v-model="data.form.confirmPassword" autocomplete="off" prefix-icon="Lock" placeholder="请再次确认密码" />
         </el-form-item>
         <div style="margin-bottom: 20px">
-          <el-button style="width: 100%; background-color: #248243; border-color: #248243" size="large" type="primary" @click="register">注 册</el-button>
+          <el-button style="width: 100%; background-color: #248243; border-color: #248243" size="large" type="primary" @click="registers">注 册</el-button>
         </div>
         <div style="text-align: right">
           已有账号？请 <a style="color: #248243" href="/login">登录</a>
@@ -28,7 +28,7 @@ import { reactive, ref } from "vue";
 import request from "@/utils/request.js";
 import {ElMessage} from "element-plus";
 import router from "@/router/index.js";
-// import {register} from "@/api/user.js";
+import {register} from "@/api/user.js";
 
 const validatePass = (rule, value, callback) => {
   // value 表示用户输入的确认密码
@@ -57,10 +57,10 @@ const data = reactive({
   }
 })
 
-const register = () => {
+const registers = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-       request.post('/register',data).then(res => {
+       register(data.form).then(res => {
         if (res.code === 20000) {
           ElMessage.success('注册成功')
           router.push('/login')
@@ -71,6 +71,7 @@ const register = () => {
     }
   })
 }
+
 </script>
 
 <style scoped>

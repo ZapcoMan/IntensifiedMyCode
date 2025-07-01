@@ -15,7 +15,7 @@ public interface AdminService {
      *
      * @param admin 要添加的管理员对象
      */
-    public void add(Admin admin);
+    void add(Admin admin);
 
     /**
      * 更新管理员信息

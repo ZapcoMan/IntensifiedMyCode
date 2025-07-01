@@ -1,6 +1,8 @@
 package com.example.service.impl;
 
 import java.util.List;
+
+import jakarta.annotation.Resource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.example.entity.AuditLog;
@@ -18,7 +20,7 @@ public class AuditLogServiceImpl implements AuditLogService {
      * 审计日志数据访问对象
      * 用于执行与审计日志相关的数据库操作
      */
-    @Autowired
+    @Resource
     private AuditLogMapper auditLogMapper;
 
     /**

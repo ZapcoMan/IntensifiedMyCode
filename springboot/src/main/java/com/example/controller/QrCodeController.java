@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.common.R;
 import com.example.entity.Account;
 import com.example.entity.ConfirmDto;
+import com.example.exception.CustomerException;
 import com.example.service.AdminService;
 import com.example.service.QrCodeLoginService;
 
@@ -49,10 +50,29 @@ public class QrCodeController {
     }
 
     @PostMapping("/confirm")
-    public R confirmLogin(@RequestBody ConfirmDto dto) {
-        qrCodeLoginService.confirmLogin(dto.getToken(), dto.getAccount());
-        return R.success("扫码成功");
-    }
+    public R confirmLogin(@RequestBody Account account) {
+        String token = account.getToken();
+        if (token == null || token.isBlank()) {
+            throw new CustomerException("缺少二维码 token");
+        }
 
+        // 登录认证
+        Account dbAccount;
+        switch (account.getRole()) {
+            case "ADMIN":
+                dbAccount = adminService.login(account);
+                break;
+            case "USER":
+                dbAccount = userService.login(account);
+                break;
+            default:
+                throw new CustomerException("非法角色：" + account.getRole());
+        }
+
+        // 将账号信息绑定到二维码 token 上
+        qrCodeLoginService.confirmLogin(token, dbAccount);
+
+        return R.success("登录确认成功");
+    }
 
 }

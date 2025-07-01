@@ -39,7 +39,9 @@ public class AuditLogAspect {
     @Around("@annotation(auditLogRecord)")
     public Object handleAudit(ProceedingJoinPoint joinPoint, AuditLogRecord auditLogRecord) throws Throwable {
         Object result = null;
+        // 获取当前登录用户名
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        // 获取客户端IP地址
         String ip = RequestContextHolder.currentRequestAttributes() instanceof ServletRequestAttributes
                 ? ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
                 : "unknown";

@@ -2,8 +2,6 @@ package com.example.entity;
 
 import lombok.Data;
 import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
 
 /**
  * 用户信息类，继承自Account类

@@ -29,6 +29,7 @@ public class WebController {
         return R.ok().message("hello");  // 接口的返回值
     }
 
+    @ApiOperation("登录")
     @AuditLogRecord(action = "登录", resource = "用户")
     @PostMapping("/login")
     public R login(@RequestBody Account account) {

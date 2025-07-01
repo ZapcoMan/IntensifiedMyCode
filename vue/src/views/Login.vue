@@ -84,7 +84,7 @@ const login = () => {
 const generateQr = async () => {
   const res = await request.get("/qrcode/token");
   token.value = res.data;
-  qrcodeUrl.value = await QRCode.toDataURL(`myapp://login?token=${token.value}`);
+  qrcodeUrl.value = await QRCode.toDataURL(`http://localhost:5173/qrcode/confirm?token=${token.value}`);
   pollQrStatus();
 };
 

@@ -21,6 +21,9 @@ const router = createRouter({
         {path: 'person', meta: {name:'个人信息'}, component: () =>import('../views/Person.vue'),},
         // 修改密码路由
         {path: 'updatePassword', meta: {name:'修改密码'}, component: () =>import('../views/UpdatePassword.vue'),},
+        // src/router/index.js 或 routes.js
+        {path: "/confirm", name: "QrConfirm", component: () => import("@/views/QrConfirm.vue"),},
+
       ]
     },
     // 登录路由配置

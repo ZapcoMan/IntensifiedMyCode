@@ -1,17 +1,15 @@
 package com.example.entity;
 
 
-import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 /**
  * Account类代表系统中的用户账户信息
  * 它封装了用户相关的各种属性，如用户名、密码、角色等
  * 该类使用了Lombok库的注解，以自动生成setter和getter方法，简化代码
  */
-@Setter
-@Getter
+@NoArgsConstructor  // 生成无参构造函数
+@AllArgsConstructor // 生成全参构造函数
 @Data
 public class Account {
 
@@ -59,5 +57,12 @@ public class Account {
      * 新密码的再次确认，确保用户在修改密码时正确无误地输入新密码
      */
     private String new2password;
+
+
+    public Account(String username, String password, String role) {
+        this.username = username;
+        this.password = password;
+        this.role = role;
+    }
 
 }

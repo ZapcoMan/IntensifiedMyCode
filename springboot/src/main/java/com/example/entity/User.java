@@ -7,8 +7,8 @@ import lombok.EqualsAndHashCode;
  * 用户信息类，继承自Account类
  * 该类主要用于表示系统中的用户，包含用户的详细信息
  */
-@EqualsAndHashCode(callSuper = true)
 @Data
+@EqualsAndHashCode(callSuper = true)
 public class User extends Account {
     // 用户ID
     private Integer id;

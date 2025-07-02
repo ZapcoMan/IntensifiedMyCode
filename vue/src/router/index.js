@@ -23,6 +23,7 @@ const router = createRouter({
         {path: 'updatePassword', meta: {name:'修改密码'}, component: () =>import('../views/UpdatePassword.vue'),},
         // src/router/index.js 或 routes.js
 
+
       ]
     },
     // 登录路由配置
@@ -32,7 +33,8 @@ const router = createRouter({
     // 404页面路由配置
     { path: '/notfound', component: () =>import('../views/404.vue'),},
     // 捕获所有未匹配到的路径并重定向到404页面
-    { path: '/:pathMatch(.*)', redirect: '/notFound' }
+    { path: '/:pathMatch(.*)', redirect: '/notFound' },
+    {path: "/qr-confirm", name: "QrConfirm", component: () => import("@/views/QrConfirm.vue"),},
   ],
 })
 

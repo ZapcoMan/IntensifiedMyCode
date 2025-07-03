@@ -11,6 +11,7 @@
 - [五、前端模块说明](#五前端模块说明)
 - [六、数据库设计](#六数据库设计)
 - [七、如何运行项目](#七如何运行项目)
+- [八、快速开始](#八快速开始)
 
 ## 一、项目概述
 
@@ -167,7 +168,7 @@
 - `notification`：系统通知
 - [file](file://cn\hutool\core\io\FileUtil.java#L55-L55)：上传文件记录
 
-SQL脚本位于：`sql/intensifiedmycode.sql`
+> SQL脚本位于：`sql/intensifiedmycode.sql`
 
 ---
 
@@ -256,13 +257,13 @@ SQL脚本位于：`sql/intensifiedmycode.sql`
     - `audit_log`：操作日志表，记录每个操作的时间、用户、描述等。
     - `notification`：通知表，记录系统发送的通知内容和状态。
 
-## 5. 如何运行项目
+## 七、如何运行项目
 
 ### 后端
 
 1. 导入数据库：
 
-## 五、快速开始
+## 八、快速开始
 
 ### 后端启动步骤
 

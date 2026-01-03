@@ -34,7 +34,7 @@ const router = createRouter({
     { path: '/notfound', component: () =>import('../views/404.vue'),},
     // 捕获所有未匹配到的路径并重定向到404页面
     { path: '/:pathMatch(.*)', redirect: '/notFound' },
-    {path: "/qr-confirm", name: "QrConfirm", component: () => import("@/views/QrConfirm.vue"),},
+
   ],
 })
 

@@ -4,10 +4,7 @@
 
     <transition name="fade-in">
       <div class="login-box">
-        <el-tabs v-model="activeTab" stretch class="custom-tabs">
-
-          <!-- 账号密码登录 -->
-          <el-tab-pane label="账号密码登录" name="password">
+        <div class="form-container">
             <transition name="slide-up">
               <el-form ref="formRef" :model="data.form" :rules="data.rules" class="form-container">
                 <div class="form-title">欢迎登录</div>
@@ -41,42 +38,21 @@
                 </div>
               </el-form>
             </transition>
-          </el-tab-pane>
-
-          <!-- 扫码登录 -->
-          <el-tab-pane label="扫码登录" name="qrcode">
-            <transition name="zoom-in">
-              <div class="qr-box">
-                <canvas ref="canvasRef" class="qr-canvas" />
-                <div class="qr-status">
-                  <el-tag v-if="qrStatus === 'pending'" type="info" effect="dark">请使用手机扫码确认登录</el-tag>
-                  <el-tag v-else-if="qrStatus === 'confirmed'" type="success" effect="dark">登录成功，正在跳转...</el-tag>
-                  <el-tag v-else type="danger" effect="dark">二维码已过期，请切换刷新</el-tag>
-                </div>
-              </div>
-            </transition>
-          </el-tab-pane>
-
-        </el-tabs>
+        </div>
       </div>
     </transition>
   </div>
 </template>
 
 <script setup>
-import { reactive, ref, watch } from 'vue'
-import QRCode from 'qrcode'
+import { reactive, ref } from 'vue'
+
 import request from '@/utils/request.js'
 import { ElMessage } from 'element-plus'
 import router from '@/router/index.js'
 import { User, Lock, Key } from '@element-plus/icons-vue'
 
 const formRef = ref()
-const activeTab = ref("password")
-const canvasRef = ref()
-const uuid = ref("")
-const qrStatus = ref("pending")
-let pollTimer = null
 
 const data = reactive({
   form: { role: 'ADMIN' },
@@ -108,44 +84,9 @@ const login = () => {
   })
 }
 
-const initQrLogin = async () => {
-  const res = await request.get('/qrcode/generate')
-  uuid.value = res.data
-  qrStatus.value = "pending"
-  const qrContent = `${location.origin}/qr-confirm?uuid=${uuid.value}`
-  QRCode.toCanvas(canvasRef.value, qrContent)
-  startPolling()
-}
 
-const startPolling = () => {
-  clearInterval(pollTimer)
-  pollTimer = setInterval(async () => {
-    const res = await request.get(`/qrcode/status/${uuid.value}`)
-    const status = res.data.status
-    if (status === 'confirmed') {
-      clearInterval(pollTimer)
-      const account = res.data.account
-      localStorage.setItem("code_user", JSON.stringify(account))
-      localStorage.setItem("token", account.token)
-      qrStatus.value = "confirmed"
-      ElMessage.success("扫码成功")
-      setTimeout(() => {
-        router.push('/manager/home')
-      }, 800)
-    } else if (status === 'expired') {
-      clearInterval(pollTimer)
-      qrStatus.value = "expired"
-    }
-  }, 2000)
-}
 
-watch(activeTab, (val) => {
-  if (val === "qrcode") {
-    initQrLogin()
-  } else {
-    clearInterval(pollTimer)
-  }
-})
+
 </script>
 
 <style scoped>
@@ -210,42 +151,6 @@ watch(activeTab, (val) => {
   color: #376eff;
   text-decoration: none;
   font-weight: 600;
-}
-
-.qr-box {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-top: 15px;
-}
-
-.qr-canvas {
-  width: 180px;
-  height: 180px;
-  border-radius: 6px;
-  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
-
-.qr-status {
-  margin-top: 16px;
-}
-
-.custom-tabs :deep(.el-tabs__item) {
-  font-size: 16px;
-  padding: 12px 20px;
-}
-
-/* 动画过渡效果 */
-.fade-in-enter-active {
-  animation: fadeIn 0.5s ease-out;
-}
-
-.slide-up-enter-active {
-  animation: slideUp 0.4s ease-out;
-}
-
-.zoom-in-enter-active {
-  animation: zoomIn 0.3s ease-in-out;
 }
 
 @keyframes fadeIn {

@@ -104,6 +104,8 @@
 import router from "@/router/index.js";
 import { reactive, onMounted, ref, watch } from "vue";
 import { getMenuByRole } from '@/api/menu.js'
+import { validateToken } from '@/api/auth.js'  // 新增导入
+import { ElMessage } from 'element-plus'  // 新增导入
 import { House, User, EditPen, SwitchButton, ArrowDown, Monitor, Setting, Document, Moon, Sunny } from '@element-plus/icons-vue'
 
 // 图标映射
@@ -151,6 +153,39 @@ const toggleTheme = () => {
   localStorage.setItem('theme', newTheme);
 }
 
+// 验证token是否有效
+const checkTokenValidity = async () => {
+  try {
+    const response = await validateToken()
+    if (response.code !== 20000) {
+      // Token无效，清除本地存储并重定向到登录页面
+      localStorage.removeItem('code_user')
+      localStorage.removeItem('token')
+      router.push('/login')
+      ElMessage.error('登录已过期，请重新登录')
+      return false
+    }
+    return true
+  } catch (error) {
+    // 验证失败，可能是网络问题或token已过期
+    localStorage.removeItem('code_user')
+    localStorage.removeItem('token')
+    router.push('/login')
+    ElMessage.error('登录已过期，请重新登录')
+    return false
+  }
+}
+
+// 定期检查token有效性（每10分钟检查一次）
+const startTokenCheckInterval = () => {
+  setInterval(async () => {
+    const user = localStorage.getItem('code_user')
+    if (user) {
+      await checkTokenValidity()
+    }
+  }, 10 * 60 * 1000) // 10分钟
+}
+
 // 加载菜单
 const loadMenu = async () => {
   try {
@@ -168,13 +203,26 @@ const loadMenu = async () => {
   }
 }
 
-onMounted(() => {
-  loadMenu()
-  
-  // 应用保存的主题
-  const savedTheme = localStorage.getItem('theme') || 'light'
-  document.documentElement.setAttribute('data-theme', savedTheme)
-  darkMode.value = savedTheme === 'dark'
+onMounted(async () => {
+  const user = localStorage.getItem('code_user')
+  if (user) {
+    const isValid = await checkTokenValidity()
+    if (isValid) {
+      loadMenu()
+      // 应用保存的主题
+      const savedTheme = localStorage.getItem('theme') || 'light'
+      document.documentElement.setAttribute('data-theme', savedTheme)
+      darkMode.value = savedTheme === 'dark'
+      // 启动定期检查
+      startTokenCheckInterval()
+    }
+  } else {
+    loadMenu()
+    // 应用保存的主题
+    const savedTheme = localStorage.getItem('theme') || 'light'
+    document.documentElement.setAttribute('data-theme', savedTheme)
+    darkMode.value = savedTheme === 'dark'
+  }
 })
 
 // 监听主题变化

@@ -27,7 +27,11 @@ public enum ResultCodeEnum {
     /**
      * 表示HTTP客户端错误的响应码
      */
-    HTTP_CLIENT_ERROR(false,20004,"客户端错误");
+    HTTP_CLIENT_ERROR(false,20004,"客户端错误"),
+    /**
+     * 表示Token无效的响应码
+     */
+    TOKEN_INVALID(false, 20005, "Token已失效或不存在");
 
     // 成功状态标识
     private Boolean success;

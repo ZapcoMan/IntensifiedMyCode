@@ -68,6 +68,12 @@ public class R {
         return result;
     }
 
+    public static R error(ResultCodeEnum result,String msg) {
+        R resp = new R();
+        resp.setCode(result.getCode());
+        resp.setMessage(msg);
+        return resp;
+    }
     // 设置结果的方法，接受一个结果枚举作为参数
     public static R setResult(ResultCodeEnum result) {
         R r = new R();

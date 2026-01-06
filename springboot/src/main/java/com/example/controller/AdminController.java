@@ -2,8 +2,10 @@ package com.example.controller;
 
 import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
+import com.example.common.ResultCodeEnum;
 import com.example.entity.Admin;
 import com.example.service.impl.AdminServiceImpl;
+import com.example.utils.TokenUtils;
 import io.swagger.annotations.ApiOperation;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
@@ -81,6 +83,22 @@ public class AdminController {
     public R deleteBatch(@RequestBody List<Admin> list) {
         adminServiceImpl.deleteBatch(list);
         return R.ok();
+    }
+
+    /**
+     * 验证token是否有效
+     *
+     * @return 返回token验证结果
+     */
+    @AuditLogRecord(action = "验证Token", resource = "Token")
+    @ApiOperation("验证Token")
+    @GetMapping("/validateToken")
+    public R validateToken() {
+        if (TokenUtils.validateToken()) {
+            return R.ok();
+        } else {
+            return R.error(ResultCodeEnum.TOKEN_INVALID,"Token已失效或不存在");
+        }
     }
 
     /**

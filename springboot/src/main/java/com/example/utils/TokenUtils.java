@@ -78,4 +78,17 @@ public class TokenUtils {
         return null;
     }
 
+    /**
+     * 验证Token是否有效
+     * @return true 如果Token有效，false 如果Token无效或不存在
+     */
+    public static boolean validateToken() {
+        try {
+            Account currentUser = getCurrentUser();
+            return currentUser != null;
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
 }

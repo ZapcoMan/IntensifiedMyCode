@@ -38,10 +38,10 @@ const router = createRouter({
   ],
 })
 
-// 添加路由守卫，防止已登录用户访问登录页面
-router.beforeEach((to, from, next) => {
-  // 如果用户访问登录页面
-  if (to.path === '/login') {
+// 添加路由守卫，防止已登录用户访问登录页面并验证token有效性
+router.beforeEach(async (to, from, next) => {
+  // 如果用户访问登录页面或其子路径
+  if (to.path.startsWith('/login')) {
     // 检查本地存储中是否有用户信息
     const user = localStorage.getItem('code_user')
     if (user) {
@@ -52,8 +52,32 @@ router.beforeEach((to, from, next) => {
       next()
     }
   } else {
-    // 访问其他页面时，直接通过
-    next()
+    // 检查是否已登录，如果已登录则验证token是否有效
+    const user = localStorage.getItem('code_user')
+    if (user) {
+      try {
+        // 验证token是否仍然有效
+        const res = await import('@/api/auth.js')
+        const response = await res.validateToken()
+        if (response.code === 20000) {
+          // Token有效，允许访问
+          next()
+        } else {
+          // Token无效，清除本地存储并重定向到登录页面
+          localStorage.removeItem('code_user')
+          localStorage.removeItem('token')
+          next('/login')
+        }
+      } catch (error) {
+        // 验证失败，可能是网络问题或token已过期
+        localStorage.removeItem('code_user')
+        localStorage.removeItem('token')
+        next('/login')
+      }
+    } else {
+      // 未登录，直接通过（登录页面会由上面的逻辑处理）
+      next()
+    }
   }
 })
 

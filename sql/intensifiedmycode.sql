@@ -88,4 +88,29 @@ INSERT INTO `user` VALUES (3, 'student3', '123456', 'USER', '学生3', 'http://l
 INSERT INTO `user` VALUES (5, 'student4', '123456', 'USER', '学生4', 'http://localhost:9991/files/download/1742899014576_微信图片_20250325183349.jpg');
 INSERT INTO `user` VALUES (6, 'student5', '123456', 'USER', '学生5', 'http://localhost:9991/files/download/1742375243400_a71653afa6162e44fe6417f3df576d97.jpg');
 
+-- ----------------------------
+-- Table structure for menu
+-- ----------------------------
+DROP TABLE IF EXISTS `menu`;
+CREATE TABLE `menu`  (
+  `id` int(11) NOT NULL AUTO_INCREMENT COMMENT '菜单ID',
+  `name` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单名称',
+  `path` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '菜单路径',
+  `parent_id` int(11) NOT NULL DEFAULT 0 COMMENT '父菜单ID',
+  `icon` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '菜单图标',
+  `order_num` int(11) NOT NULL DEFAULT 0 COMMENT '排序号',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '角色权限',
+  `component` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '组件路径',
+  `status` varchar(10) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ENABLE' COMMENT '状态',
+  PRIMARY KEY (`id`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8mb4 COLLATE = utf8mb4_unicode_ci ROW_FORMAT = Dynamic;
+
+-- ----------------------------
+-- Records of menu
+-- ----------------------------
+INSERT INTO `menu` VALUES (1, '首页', '/manager/home', 0, 'House', 1, 'USER', 'Home.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (2, '用户管理', '', 0, 'User', 2, 'ADMIN', '', 'ENABLE');
+INSERT INTO `menu` VALUES (3, '管理员信息', '/manager/admin', 2, '', 1, 'ADMIN', 'Admin.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (4, '普通用户(学生)信息', '/manager/user', 2, '', 2, 'ADMIN', 'User.vue', 'ENABLE');
+
 SET FOREIGN_KEY_CHECKS = 1;

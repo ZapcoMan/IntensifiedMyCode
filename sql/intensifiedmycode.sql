@@ -53,15 +53,6 @@ CREATE TABLE `audit_log`  (
   PRIMARY KEY (`id`) USING BTREE
 ) ENGINE = InnoDB AUTO_INCREMENT = 53 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Dynamic;
 
--- ----------------------------
--- Records of audit_log
--- ----------------------------
-INSERT INTO `audit_log` VALUES (1, 'anonymousUser', '登录', '用户', '0:0:0:0:0:0:0:1', '[Account(id=null, username=admin1, password=123456, role=ADMIN, name=null, token=null, avatar=null, newpassword=null, new2password=null)]', '2025-06-30 12:40:09');
-INSERT INTO `audit_log` VALUES (2, 'anonymousUser', '登录', '用户', '0:0:0:0:0:0:0:1', '[Account(id=null, username=admin1, password=123456, role=ADMIN, name=null, token=null, avatar=null, newpassword=null, new2password=null)]', '2025-06-30 21:56:52');
-INSERT INTO `audit_log` VALUES (3, 'admin1', '更新管理员信息', '管理员', '0:0:0:0:0:0:0:1', '[Account(id=1, username=admin1, password=e10adc3949ba59abbe56e057f20f883e, role=ADMIN, name=管理员1, token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxLUFETUlOIiwiZXhwIjoxNzUxMzc4MjEyfQ.2AGtJZ-LhozoJjzZLQxT8q9MjURdWJHPHXscBsqtCYo, avatar=http://localhost:9999/files/download/1751296265210__5_百乐城_来自小红书网页版.jpg, newpassword=null, new2password=null)]', '2025-06-30 23:40:57');
-INSERT INTO `audit_log` VALUES (4, 'admin1', '分页查询管理员', '管理员', '0:0:0:0:0:0:0:1', '[1, 5, Account(id=null, username=null, password=null, role=null, name=null, token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxLUFETUlOIiwiZXhwIjoxNzUxMzc4MjEyfQ.2AGtJZ-LhozoJjzZLQxT8q9MjURdWJHPHXscBsqtCYo, avatar=null, newpassword=null, new2password=null)]', '2025-06-30 23:44:57');
-INSERT INTO `audit_log` VALUES (5, 'admin1', '分页查询管理员', '管理员', '0:0:0:0:0:0:0:1', '[1, 5, Account(id=null, username=null, password=null, role=null, name=null, token=eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJhdWQiOiIxLUFETUlOIiwiZXhwIjoxNzUxMzc4MjEyfQ.2AGtJZ-LhozoJjzZLQxT8q9MjURdWJHPHXscBsqtCYo, avatar=null, newpassword=null, new2password=null)]', '2025-06-30 23:44:57');
-INSERT INTO `audit_log` VALUES (6, 'anonymousUser', '文件下载', '文件', '0:0:0:0:0:0:0:1', '[1742375044354_a71653afa6162e44fe6417f3df576d97.jpg, org.springframework.web.context.request.async.StandardServletAsyncWebRequest$LifecycleHttpServletResponse@33e966ab]', '2025-06-30 23:44:58');
 
 
 -- ----------------------------
@@ -82,11 +73,11 @@ CREATE TABLE `user`  (
 -- ----------------------------
 -- Records of user
 -- ----------------------------
-INSERT INTO `user` VALUES (1, 'student1', '123456', 'USER', '学生1', 'http://localhost:9991/files/download/1742899004787_微信图片_202503251834051.jpg');
-INSERT INTO `user` VALUES (2, 'student2', '123456', 'USER', '学生2', 'http://localhost:9991/files/download/1742899025437_微信图片_202503251834052.jpg');
-INSERT INTO `user` VALUES (3, 'student3', '123456', 'USER', '学生3', 'http://localhost:9991/files/download/1742899019835_微信图片_202503251834053.jpg');
-INSERT INTO `user` VALUES (5, 'student4', '123456', 'USER', '学生4', 'http://localhost:9991/files/download/1742899014576_微信图片_20250325183349.jpg');
-INSERT INTO `user` VALUES (6, 'student5', '123456', 'USER', '学生5', 'http://localhost:9991/files/download/1742375243400_a71653afa6162e44fe6417f3df576d97.jpg');
+INSERT INTO `user` VALUES (1, 'user1', '123456', 'USER', '用户1', 'http://localhost:9991/files/download/1742899004787_微信图片_202503251834051.jpg');
+INSERT INTO `user` VALUES (2, 'user2', '123456', 'USER', '用户2', 'http://localhost:9991/files/download/1742899025437_微信图片_202503251834052.jpg');
+INSERT INTO `user` VALUES (3, 'user3', '123456', 'USER', '用户3', 'http://localhost:9991/files/download/1742899019835_微信图片_202503251834053.jpg');
+INSERT INTO `user` VALUES (5, 'user4', '123456', 'USER', '用户4', 'http://localhost:9991/files/download/1742899014576_微信图片_20250325183349.jpg');
+INSERT INTO `user` VALUES (6, 'user5', '123456', 'USER', '用户5', 'http://localhost:9991/files/download/1742375243400_a71653afa6162e44fe6417f3df576d97.jpg');
 
 -- ----------------------------
 -- Table structure for menu
@@ -111,6 +102,6 @@ CREATE TABLE `menu`  (
 INSERT INTO `menu` VALUES (1, '首页', '/manager/home', 0, 'House', 1, 'USER', 'Home.vue', 'ENABLE');
 INSERT INTO `menu` VALUES (2, '用户管理', '', 0, 'User', 2, 'ADMIN', '', 'ENABLE');
 INSERT INTO `menu` VALUES (3, '管理员信息', '/manager/admin', 2, '', 1, 'ADMIN', 'Admin.vue', 'ENABLE');
-INSERT INTO `menu` VALUES (4, '普通用户(学生)信息', '/manager/user', 2, '', 2, 'ADMIN', 'User.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (4, '用户信息', '/manager/user', 2, '', 2, 'ADMIN', 'User.vue', 'ENABLE');
 
 SET FOREIGN_KEY_CHECKS = 1;

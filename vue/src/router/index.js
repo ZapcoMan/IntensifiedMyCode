@@ -7,7 +7,7 @@ const router = createRouter({
   // 定义应用的路由配置
   routes: [
     // 根路径重定向到管理主页
-    { path: '/', redirect:'/manager/home'},
+    { path: '/', redirect:'/login'},
     // 管理员相关路由配置
     { path: '/manager', component: () =>import('../views/Manager.vue'),
       children:[

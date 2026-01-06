@@ -5,39 +5,39 @@
     <transition name="fade-in">
       <div class="login-box">
         <div class="form-container">
-            <transition name="slide-up">
-              <el-form ref="formRef" :model="data.form" :rules="data.rules" class="form-container">
-                <div class="form-title">欢迎登录</div>
+          <transition name="slide-up">
+            <el-form ref="formRef" :model="data.form" :rules="data.rules" class="form-container">
+              <div class="form-title">欢迎登录</div>
 
-                <el-form-item prop="username">
-                  <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号">
-                    <template #prefix><el-icon><User /></el-icon></template>
-                  </el-input>
-                </el-form-item>
+              <el-form-item prop="username">
+                <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号">
+                  <template #prefix><el-icon><User /></el-icon></template>
+                </el-input>
+              </el-form-item>
 
-                <el-form-item prop="password">
-                  <el-input size="large" show-password v-model="data.form.password" autocomplete="off" placeholder="请输入密码">
-                    <template #prefix><el-icon><Lock /></el-icon></template>
-                  </el-input>
-                </el-form-item>
+              <el-form-item prop="password">
+                <el-input size="large" show-password v-model="data.form.password" autocomplete="off" placeholder="请输入密码">
+                  <template #prefix><el-icon><Lock /></el-icon></template>
+                </el-input>
+              </el-form-item>
 
-                <el-form-item prop="role">
-                  <el-select size="large" style="width: 100%" v-model="data.form.role" placeholder="选择角色">
-                    <el-option label="管理员" value="ADMIN" />
-                    <el-option label="学生" value="USER" />
-                    <el-option label="老师" value="TEACHER" />
-                  </el-select>
-                </el-form-item>
+              <el-form-item prop="role">
+                <el-select size="large" style="width: 100%" v-model="data.form.role" placeholder="选择角色">
+                  <el-option label="管理员" value="ADMIN" />
+                  <el-option label="学生" value="USER" />
+<!--                  <el-option label="老师" value="TEACHER" />-->
+                </el-select>
+              </el-form-item>
 
-                <el-button size="large" class="login-btn" type="primary" @click="login">
-                  <el-icon><Key /></el-icon> 登 录
-                </el-button>
+              <el-button size="large" class="login-btn" type="primary" @click="login">
+                <el-icon><Key /></el-icon> 登 录
+              </el-button>
 
-                <div class="register-tip">
-                  还没有账号？<a href="/register">立即注册</a>
-                </div>
-              </el-form>
-            </transition>
+              <div class="register-tip">
+                还没有账号？<a href="/register">立即注册</a>
+              </div>
+            </el-form>
+          </transition>
         </div>
       </div>
     </transition>

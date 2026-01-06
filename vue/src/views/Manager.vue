@@ -9,7 +9,7 @@
         </div>
       </div>
       <div class="header-center">
-        <p class="header-title">脚手架管理系统</p>
+<!--        <p class="header-title">脚手架管理系统</p>-->
       </div>
       <div class="header-right">
         <!-- 主题切换按钮 -->

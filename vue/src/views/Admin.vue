@@ -12,8 +12,7 @@
     </div>
 
     <div class="card" style="margin-bottom: 5px">
-      <el-table :data="data.tableData" style="width: 100%" @selection-change="handleSelectionChange"
-                :header-cell-style="{ color: '#333', backgroundColor: '#eaf4ff' }">
+      <el-table :data="data.tableData" style="width: 100%" @selection-change="handleSelectionChange">
         <el-table-column type="selection" width="55" />
         <el-table-column label="头像">
           <template #default="scope">
@@ -26,8 +25,8 @@
         <el-table-column prop="name" label="真实姓名" />
         <el-table-column label="操作" width="100">
           <template #default="scope">
-            <el-button type="primary" icon="Edit" circle @click="handleEdit(scope.row)"></el-button>
-            <el-button type="danger" icon="Delete" circle @click="del(scope.row.id)"></el-button>
+            <el-button type="primary" :icon="Edit" circle @click="handleEdit(scope.row)"></el-button>
+            <el-button type="danger" :icon="Delete" circle @click="del(scope.row.id)"></el-button>
           </template>
         </el-table-column>
       </el-table>
@@ -79,7 +78,7 @@
 
 <script setup>
 import { reactive, ref } from "vue";
-import {Search} from "@element-plus/icons-vue";
+import {Search, Edit, Delete} from "@element-plus/icons-vue";
 import request from "@/utils/request.js";
 import {ElMessage,ElMessageBox} from "element-plus";
 
@@ -164,15 +163,135 @@ const add = () => {
   })
 }
 
+// 删除用户的方法
+const del = (id) => {
+  ElMessageBox.confirm('删除后无法恢复，您确认删除吗？', '删除确认', { type: 'warning' })
+      .then(() => {
+        request.delete('/admin/delete/' + id).then(res => {
+          if (res.code === 20000) {
+            ElMessage.success('删除成功')
+            load()
+          } else {
+            ElMessage.error(res.message)
+          }
+        })
+      })
+      .catch(() => {})
+}
+
+// 更新用户的方法
+const update = () => {
+  formRef.value.validate((valid) => {
+    if (valid) {
+      request.post('/admin/update', data.form).then(res => {
+        if (res.code === 20000) {
+          data.formVisible = false
+          ElMessage.success('修改成功')
+          load()
+        } else {
+          ElMessage.error(res.message)
+        }
+      })
+    }
+  })
+}
+
+// 保存用户信息（新增或更新）
+const save = () => {
+  if (data.form.id) {
+    update()
+  } else {
+    add()
+  }
+}
+
+// 批量删除用户
+const deleteBatch = () => {
+  if (data.rows.length === 0) {
+    ElMessage.warning('请选择数据')
+    return
+  }
+  ElMessageBox.confirm('删除后无法恢复，您确认删除吗？', '删除确认', { type: 'warning' })
+      .then(() => {
+        request.post('/admin/deleteBatch', data.rows.map(v => v.id)).then(res => {
+          if (res.code === 20000) {
+            ElMessage.success('批量删除成功')
+            load()
+          } else {
+            ElMessage.error(res.message)
+          }
+        })
+      })
+      .catch(() => {})
+}
+
 // 显示编辑用户的表单
 const handleEdit = (row) => {
   data.form = JSON.parse(JSON.stringify(row))  // 深度拷贝数据
   data.formVisible = true
 }
 
-// 更新用户的方法
+// 选择行事件
+const handleSelectionChange = (rows) => {
+  data.rows = rows
+}
+
+// 更新头像
 const handleFileSuccess = (res) => {
   data.form.avatar = res.data
 }
-
 </script>
+
+<style scoped>
+/* 为表格添加主题支持 */
+:deep(.el-table) {
+  background-color: var(--card-bg-color);
+  transition: background-color var(--transition);
+}
+
+:deep(.el-table th) {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+:deep([data-theme="dark"] .el-table th) {
+  background-color: #3a3a3a;
+  color: #e4e6eb;
+}
+
+:deep(.el-table tr) {
+  background-color: var(--card-bg-color);
+  color: var(--text-color);
+  transition: background-color var(--transition), color var(--transition);
+}
+
+:deep([data-theme="dark"] .el-table tr) {
+  background-color: #2d2d2d;
+  color: #e4e6eb;
+}
+
+/* 移除悬停效果，保持一致的样式 */
+:deep(.el-table .el-table__body tr:hover > td) {
+  background-color: inherit !important;
+  color: var(--text-color) !important;
+}
+
+:deep([data-theme="dark"] .el-table .el-table__body tr:hover > td) {
+  background-color: inherit !important;
+  color: var(--text-color) !important;
+}
+
+/* 悬停行中的单元格样式 */
+:deep(.el-table .el-table__body tr:hover > td .cell) {
+  color: var(--text-color) !important;
+}
+
+:deep([data-theme="dark"] .el-table .el-table__body tr:hover > td .cell) {
+  color: var(--text-color) !important;
+}
+
+:deep(.el-table__row) {
+  transition: background-color var(--transition);
+}
+</style>

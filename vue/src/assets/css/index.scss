@@ -1,9 +1,8 @@
-@forward "element-plus/theme-chalk/src/common/var.scss" with (
-  $colors: (
-    "primary": ("base": #2c82ff),
-    "success": ("base": #31bf00),
-    "warning": ("base": #ffad00),
-    "danger": ("base": #e52f2f),
-    "info": ("base": #8055ff),
-  )
-);
+// 修改 Element Plus 主题变量
+:root {
+  --el-color-primary: #2c82ff;
+  --el-color-success: #31bf00;
+  --el-color-warning: #ffad00;
+  --el-color-danger: #e52f2f;
+  --el-color-info: #8055ff;
+}

@@ -9,9 +9,19 @@
         </div>
       </div>
       <div class="header-center">
-<!--        <p class="header-title">脚手架管理系统</p>-->
+        <p class="header-title">脚手架管理系统</p>
       </div>
       <div class="header-right">
+        <!-- 主题切换按钮 -->
+        <el-button 
+          class="theme-toggle-btn" 
+          :icon="darkMode ? Moon : Sunny" 
+          circle 
+          size="default"
+          @click="toggleTheme"
+          :title="darkMode ? '切换到亮色主题' : '切换到暗色主题'"
+        />
+        
         <el-dropdown>
           <div class="user-info">
             <img v-if="data.user?.avatar" class="user-avatar" :src="data.user?.avatar" alt="Avatar">
@@ -26,7 +36,6 @@
               </el-dropdown-item>
               <el-dropdown-item @click="router.push('/manager/updatePassword')">
                 <el-icon><EditPen /></el-icon> 修改密码
-
               </el-dropdown-item>
               <el-dropdown-item @click="logout" divided>
                 <el-icon><SwitchButton /></el-icon> 退出登录
@@ -93,9 +102,9 @@
 
 <script setup>
 import router from "@/router/index.js";
-import { reactive, onMounted } from "vue";
+import { reactive, onMounted, ref, watch } from "vue";
 import { getMenuByRole } from '@/api/menu.js'
-import { House, User, EditPen, SwitchButton, ArrowDown, Monitor, Setting, Document } from '@element-plus/icons-vue'
+import { House, User, EditPen, SwitchButton, ArrowDown, Monitor, Setting, Document, Moon, Sunny } from '@element-plus/icons-vue'
 
 // 图标映射
 const iconMap = {
@@ -113,6 +122,9 @@ const data = reactive({
   isCollapse: false
 })
 
+// 主题状态
+const darkMode = ref(localStorage.getItem('theme') === 'dark')
+
 const logout = () => {
   localStorage.removeItem('code_user')
   location.href = '/login'
@@ -129,6 +141,14 @@ const getIconComponent = (iconName) => {
     return iconMap[lowerIconName] || null
   }
   return null
+}
+
+// 切换主题
+const toggleTheme = () => {
+  const newTheme = darkMode.value ? 'light' : 'dark';
+  darkMode.value = !darkMode.value;
+  document.documentElement.setAttribute('data-theme', newTheme);
+  localStorage.setItem('theme', newTheme);
 }
 
 // 加载菜单
@@ -150,6 +170,18 @@ const loadMenu = async () => {
 
 onMounted(() => {
   loadMenu()
+  
+  // 应用保存的主题
+  const savedTheme = localStorage.getItem('theme') || 'light'
+  document.documentElement.setAttribute('data-theme', savedTheme)
+  darkMode.value = savedTheme === 'dark'
+})
+
+// 监听主题变化
+watch(darkMode, (newVal) => {
+  const theme = newVal ? 'dark' : 'light';
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme);
 })
 
 </script>
@@ -159,7 +191,8 @@ onMounted(() => {
   min-height: 100vh;
   display: flex;
   flex-direction: column;
-  background-color: #f5f7fa;
+  background-color: var(--main-bg-color);
+  transition: background-color var(--transition), color var(--transition);
 }
 
 .header {
@@ -167,11 +200,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #fff;
+  background-color: var(--header-bg-color);
   box-shadow: 0 1px 4px rgba(0, 21, 41, 0.08);
   position: sticky;
   top: 0;
   z-index: 100;
+  transition: background-color var(--transition), color var(--transition);
 }
 
 .header-left {
@@ -196,7 +230,8 @@ onMounted(() => {
 .logo-text {
   font-size: 18px;
   font-weight: bold;
-  color: #333;
+  color: var(--text-color);
+  transition: color var(--transition);
 }
 
 .header-center {
@@ -209,8 +244,9 @@ onMounted(() => {
 .header-title {
   font-size: 18px;
   font-weight: 500;
-  color: #333;
+  color: var(--text-color);
   margin: 0;
+  transition: color var(--transition);
 }
 
 .header-right {
@@ -218,6 +254,25 @@ onMounted(() => {
   padding-right: 20px;
   display: flex;
   align-items: center;
+  gap: 15px; /* 添加间距 */
+}
+
+.theme-toggle-btn {
+  width: 44px;
+  height: 44px;
+  border: none;
+  background-color: var(--header-bg-color);
+  color: var(--text-color);
+  transition: all var(--transition);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.theme-toggle-btn:hover {
+  background-color: var(--main-bg-color);
+  color: var(--el-color-primary);
+  transform: scale(1.1);
 }
 
 .user-info {
@@ -230,7 +285,7 @@ onMounted(() => {
 }
 
 .user-info:hover {
-  background-color: #f5f5f5;
+  background-color: var(--main-bg-color);
 }
 
 .user-avatar {
@@ -242,7 +297,8 @@ onMounted(() => {
 
 .user-name {
   margin-right: 8px;
-  color: #333;
+  color: var(--text-color);
+  transition: color var(--transition);
 }
 
 .arrow-down {
@@ -258,16 +314,18 @@ onMounted(() => {
 .sidebar {
   width: 240px;
   transition: width 0.3s;
-  background-color: #fff;
+  background-color: var(--sidebar-bg-color);
   box-shadow: 2px 0 6px rgba(0, 21, 41, 0.1);
   height: calc(100vh - 60px);
   position: relative;
   overflow-y: auto;
+  transition: background-color var(--transition), color var(--transition);
 }
 
 .side-menu {
   border: none;
-  background-color: transparent;
+  background-color: var(--sidebar-bg-color);
+  transition: background-color var(--transition);
 }
 
 .side-menu:not(.el-menu--collapse) {
@@ -278,37 +336,46 @@ onMounted(() => {
 .main-content {
   flex: 1;
   padding: 20px;
-  background-color: #f5f7fa;
+  background-color: var(--main-bg-color);
   overflow-y: auto;
+  transition: background-color var(--transition), color var(--transition);
 }
 
 .content-wrapper {
   width: 100%;
   height: 100%;
-  background-color: #fff;
+  background-color: var(--card-bg-color);
   border-radius: 8px;
   padding: 20px;
-  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  box-shadow: var(--box-shadow);
+  color: var(--text-color);
+  transition: background-color var(--transition), color var(--transition), box-shadow var(--transition);
 }
 
 /* Element Plus 菜单样式定制 */
 :deep(.el-menu) {
   border: none;
+  background-color: var(--sidebar-bg-color) !important;
+  transition: background-color var(--transition);
 }
 
 :deep(.el-sub-menu__title) {
-  background-color: #fafafa;
-  color: #333;
+  background-color: var(--sidebar-bg-color);
+  color: var(--text-color);
+  transition: background-color var(--transition), color var(--transition);
 }
 
 :deep(.el-sub-menu__title:hover) {
-  background-color: #eef1f9;
+  background-color: var(--main-bg-color);
+  color: var(--text-color);
 }
 
 :deep(.el-menu-item) {
   height: 50px;
   line-height: 50px;
-  color: #333;
+  color: var(--text-color);
+  background-color: transparent;
+  transition: background-color var(--transition), color var(--transition);
 }
 
 :deep(.el-menu .is-active) {
@@ -317,9 +384,14 @@ onMounted(() => {
   border-right: 3px solid #1890ff;
 }
 
+:deep([data-theme="dark"] .el-menu .is-active) {
+  background-color: #3a3a3a;
+  color: #409eff;
+}
+
 :deep(.el-menu-item:not(.is-active):hover) {
-  background-color: #eef1f9;
-  color: #333;
+  background-color: var(--main-bg-color);
+  color: var(--text-color);
 }
 
 :deep(.el-dropdown) {

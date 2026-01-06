@@ -17,14 +17,19 @@
             <el-form ref="formRef" :model="data.form" :rules="data.rules" class="form-container">
 
               <el-form-item prop="username">
-                <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号"
-                          prefix-icon="User">
+                <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号">
+                  <template #prefix>
+                    <el-icon><User /></el-icon>
+                  </template>
                 </el-input>
               </el-form-item>
 
               <el-form-item prop="password">
                 <el-input size="large" show-password v-model="data.form.password" autocomplete="off"
-                          placeholder="请输入密码" prefix-icon="Lock">
+                          placeholder="请输入密码" >
+                  <template #prefix>
+                    <el-icon><Lock /></el-icon>
+                  </template>
                 </el-input>
               </el-form-item>
 

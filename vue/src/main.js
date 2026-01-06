@@ -1,21 +1,30 @@
-
 import { createApp } from 'vue'
+// import { createPinia } from 'pinia'
+
 import App from './App.vue'
 import router from './router'
+
+// 导入全局样式 - 只导入 global.css，避免循环依赖
 import './assets/css/global.css'
+// 移除 index.scss 的直接导入，因为可能与 global.css 产生循环依赖
+
+// 导入 Element Plus
 import ElementPlus from 'element-plus'
 import 'element-plus/dist/index.css'
-import zhCn from 'element-plus/es/locale/lang/zh-cn'
-import * as ElementPlusIconsVue from '@element-plus/icons-vue'
+
+// 初始化主题
+function initializeTheme() {
+  const savedTheme = localStorage.getItem('theme') || 'light'
+  document.documentElement.setAttribute('data-theme', savedTheme)
+}
+
+// 在应用启动前初始化主题
+initializeTheme()
 
 const app = createApp(App)
 
+// app.use(createPinia())
 app.use(router)
-app.use(ElementPlus, {
-    locale: zhCn,
-})
-app.mount('#app')
+app.use(ElementPlus)
 
-for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
-    app.component(key, component)
-}
+app.mount('#app')

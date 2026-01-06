@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.example.mapper.MenuMapper">
+
+    <resultMap id="MenuMap" type="com.example.entity.Menu">
+        <id property="id" column="id"/>
+        <result property="name" column="name"/>
+        <result property="path" column="path"/>
+        <result property="parentId" column="parent_id"/>
+        <result property="icon" column="icon"/>
+        <result property="orderNum" column="order_num"/>
+        <result property="role" column="role"/>
+        <result property="component" column="component"/>
+        <result property="status" column="status"/>
+        <collection property="children" ofType="com.example.entity.Menu" select="selectChildren" column="id"/>
+    </resultMap>
+
+    <select id="findByRole" parameterType="String" resultMap="MenuMap">
+        SELECT id, name, path, parent_id, icon, order_num, role, component, status
+        FROM menu
+        WHERE role = #{role} AND status = 'ENABLE'
+        ORDER BY order_num ASC
+    </select>
+
+    <select id="findAll" resultMap="MenuMap">
+        SELECT id, name, path, parent_id, icon, order_num, role, component, status
+        FROM menu
+        ORDER BY parent_id ASC, order_num ASC
+    </select>
+
+    <select id="findById" parameterType="Integer" resultMap="MenuMap">
+        SELECT id, name, path, parent_id, icon, order_num, role, component, status
+        FROM menu
+        WHERE id = #{id}
+    </select>
+
+    <select id="selectChildren" parameterType="Integer" resultMap="MenuMap">
+        SELECT id, name, path, parent_id, icon, order_num, role, component, status
+        FROM menu
+        WHERE parent_id = #{id} AND status = 'ENABLE'
+        ORDER BY order_num ASC
+    </select>
+
+    <insert id="insert" parameterType="com.example.entity.Menu">
+        INSERT INTO menu (name, path, parent_id, icon, order_num, role, component, status)
+        VALUES (#{name}, #{path}, #{parentId}, #{icon}, #{orderNum}, #{role}, #{component}, #{status})
+    </insert>
+
+    <update id="update" parameterType="com.example.entity.Menu">
+        UPDATE menu
+        SET name = #{name}, path = #{path}, parent_id = #{parentId}, icon = #{icon},
+            order_num = #{orderNum}, role = #{role}, component = #{component}, status = #{status}
+        WHERE id = #{id}
+    </update>
+
+    <delete id="delete" parameterType="Integer">
+        DELETE FROM menu WHERE id = #{id}
+    </delete>
+</mapper>

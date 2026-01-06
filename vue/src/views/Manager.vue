@@ -32,28 +32,28 @@
     <div style="display: flex">
       <!--  菜单区域开始 -->
       <div style="width: 240px;">
-        <el-menu router :default-openeds="['1']" :default-active="router.currentRoute.value.path" style="min-height: calc(100vh - 60px)">
-          <el-menu-item index="/manager/home">
-            <el-icon><House /></el-icon>
-            <span>首页</span>
-          </el-menu-item>
-          <el-sub-menu index="1" v-if="data.user.role === 'ADMIN'">
-            <template #title>
-              <el-icon><User /></el-icon>
-              <span>用户管理</span>
-            </template>
-            <el-menu-item index="/manager/admin">管理员信息</el-menu-item>
-            <el-menu-item index="/manager/user">普通用户(学生)信息</el-menu-item>
-          </el-sub-menu>
-<!--          <el-sub-menu index="2">-->
-<!--            <template #title>-->
-<!--              <el-icon><location /></el-icon>-->
-<!--              <span>功能模块</span>-->
-<!--            </template>-->
-<!--            <el-menu-item index="/manager/ask" v-if="data.user.role === 'USER' || data.user.role === 'ADMIN'">提问</el-menu-item>-->
-<!--            <el-menu-item index="/manager/answer" v-if="data.user.role === 'TEACHER' || data.user.role === 'ADMIN'">答疑</el-menu-item>-->
-<!--            <el-menu-item index="/manager/message">留言板</el-menu-item>-->
-<!--          </el-sub-menu>-->
+        <el-menu router :default-openeds="data.openedMenus" :default-active="router.currentRoute.value.path" style="min-height: calc(100vh - 60px)">
+          <template v-for="menu in data.menus" :key="menu.id">
+            <el-menu-item v-if="!menu.children || menu.children.length === 0" :index="menu.path">
+              <el-icon v-if="menu.icon">
+                <component :is="getIconComponent(menu.icon)" />
+              </el-icon>
+              <span>{{ menu.name }}</span>
+            </el-menu-item>
+            <el-sub-menu v-else :index="menu.id.toString()">
+              <template #title>
+                <el-icon v-if="menu.icon">
+                  <component :is="getIconComponent(menu.icon)" />
+                </el-icon>
+                <span>{{ menu.name }}</span>
+              </template>
+              <template v-for="child in menu.children" :key="child.id">
+                <el-menu-item :index="child.path">
+                  <span>{{ child.name }}</span>
+                </el-menu-item>
+              </template>
+            </el-sub-menu>
+          </template>
         </el-menu>
       </div>
       <!--  菜单区域结束 -->
@@ -73,11 +73,20 @@
 <script setup>
 
 import router from "@/router/index.js";
+import { reactive, onMounted } from "vue";
+import { getMenuByRole } from '@/api/menu.js'
+import { House, User } from '@element-plus/icons-vue'
 
-import { reactive } from "vue";
+// 图标映射
+const iconMap = {
+  'house': House,
+  'user': User
+}
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('code_user') || "{}")
+  user: JSON.parse(localStorage.getItem('code_user') || "{}"),
+  menus: [],
+  openedMenus: []
 })
 
 const logout = () => {
@@ -92,6 +101,36 @@ const logout = () => {
 const updateUser = () => {
   data.user = JSON.parse(localStorage.getItem("code_user") || '{}')
 }
+
+// 获取图标组件
+const getIconComponent = (iconName) => {
+  if (iconName) {
+    const lowerIconName = iconName.toLowerCase()
+    return iconMap[lowerIconName] || null
+  }
+  return null
+}
+
+// 加载菜单
+const loadMenu = async () => {
+  try {
+    const role = data.user.role || 'USER'
+    const res = await getMenuByRole(role)
+    if (res.code === 20000) {
+      data.menus = res.data  // 修改为使用 res.data 而不是 res.dataMap
+      // 初始化展开的菜单
+      data.openedMenus = data.menus.map(menu => menu.id.toString())
+    } else {
+      console.error('获取菜单失败:', res.message)
+    }
+  } catch (error) {
+    console.error('获取菜单时发生错误:', error)
+  }
+}
+
+onMounted(() => {
+  loadMenu()
+})
 
 </script>
 

@@ -38,6 +38,25 @@ const router = createRouter({
   ],
 })
 
+// 添加路由守卫，防止已登录用户访问登录页面
+router.beforeEach((to, from, next) => {
+  // 如果用户访问登录页面
+  if (to.path === '/login') {
+    // 检查本地存储中是否有用户信息
+    const user = localStorage.getItem('code_user')
+    if (user) {
+      // 如果已登录，重定向到首页
+      next('/manager/index')
+    } else {
+      // 如果未登录，允许访问登录页面
+      next()
+    }
+  } else {
+    // 访问其他页面时，直接通过
+    next()
+  }
+})
+
 // 导出路由实例供其他模块使用
 export default router
 

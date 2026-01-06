@@ -12,7 +12,7 @@ const router = createRouter({
     { path: '/manager', component: () =>import('../views/Manager.vue'),
       children:[
         // 主页路由
-        {path: 'home', meta: {name:'主页'}, component: () =>import('../views/Home.vue'),},
+        {path: 'index', meta: {name:'主页'}, component: () =>import('../views/Index.vue'),},
         // 管理员信息路由
         {path: 'admin', meta: {name:'管理员信息'}, component: () =>import('../views/Admin.vue')},
         // 用户（学生）信息路由

@@ -99,7 +99,7 @@ CREATE TABLE `menu`  (
 -- ----------------------------
 -- Records of menu
 -- ----------------------------
-INSERT INTO `menu` VALUES (1, '首页', '/manager/home', 0, 'House', 1, 'USER', 'Home.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (1, '首页', '/manager/home', 0, 'House', 1, 'USER', 'Index.vue', 'ENABLE');
 INSERT INTO `menu` VALUES (2, '用户管理', '', 0, 'User', 2, 'ADMIN', '', 'ENABLE');
 INSERT INTO `menu` VALUES (3, '管理员信息', '/manager/admin', 2, '', 1, 'ADMIN', 'Admin.vue', 'ENABLE');
 INSERT INTO `menu` VALUES (4, '用户信息', '/manager/user', 2, '', 2, 'ADMIN', 'User.vue', 'ENABLE');

@@ -1,5 +1,16 @@
 :root {
-    --el-color-primary: green;
+    --el-color-primary: #409eff;
+    --el-color-success: #67c23a;
+    --el-color-warning: #e6a23c;
+    --el-color-danger: #f56c6c;
+    --el-color-info: #909399;
+    --main-bg-color: #f5f7fa;
+    --sidebar-bg-color: #fff;
+    --header-bg-color: #fff;
+    --card-bg-color: #fff;
+    --border-radius: 8px;
+    --box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+    --transition: all 0.3s;
 }
 
 * {
@@ -11,6 +22,9 @@ body {
     padding: 0;
     color: #333;
     font-size: 14px;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'PingFang SC', 'Hiragino Sans GB',
+                 'Microsoft YaHei', 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: var(--main-bg-color);
 }
 
 a {
@@ -18,8 +32,111 @@ a {
 }
 
 .card {
-    background-color: white;
-    padding: 10px;
-    border-radius: 5px;
-    box-shadow: 0 0 8px rgba(0, 0, 0, .12);
+    background-color: var(--card-bg-color);
+    padding: 20px;
+    border-radius: var(--border-radius);
+    box-shadow: var(--box-shadow);
+    margin-bottom: 20px;
+}
+
+/* 通用布局类 */
+.container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 20px;
+}
+
+.row {
+    display: flex;
+    flex-wrap: wrap;
+    margin: 0 -10px;
+}
+
+.col {
+    padding: 0 10px;
+    flex: 1;
+}
+
+.text-center {
+    text-align: center;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.text-right {
+    text-align: right;
+}
+
+.mb-10 { margin-bottom: 10px; }
+.mb-20 { margin-bottom: 20px; }
+.mb-30 { margin-bottom: 30px; }
+
+.mt-10 { margin-top: 10px; }
+.mt-20 { margin-top: 20px; }
+.mt-30 { margin-top: 30px; }
+
+/* 按钮样式 */
+.btn {
+    display: inline-block;
+    padding: 8px 16px;
+    border-radius: var(--border-radius);
+    border: 1px solid #dcdfe6;
+    background-color: #fff;
+    color: #606266;
+    cursor: pointer;
+    transition: var(--transition);
+    font-size: 14px;
+    text-decoration: none;
+}
+
+.btn:hover {
+    background-color: #ecf5ff;
+    color: #409eff;
+    border-color: #b3d8ff;
+}
+
+.btn-primary {
+    background-color: #409eff;
+    border-color: #409eff;
+    color: #fff;
+}
+
+.btn-primary:hover {
+    background-color: #66b1ff;
+    border-color: #66b1ff;
+    color: #fff;
+}
+
+/* 表格样式 */
+.table-responsive {
+    overflow-x: auto;
+    margin: 20px 0;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--card-bg-color);
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--box-shadow);
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid #ebeef5;
+}
+
+.table th {
+    background-color: #f5f7fa;
+    font-weight: 600;
+    color: #606266;
+}
+
+.table tr:hover {
+    background-color: #f5f7fa;
 }

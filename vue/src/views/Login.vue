@@ -5,19 +5,26 @@
     <transition name="fade-in">
       <div class="login-box">
         <div class="form-container">
+          <div class="login-header">
+            <div class="logo-section">
+              <img src="@/assets/imgs/logo.png" alt="Logo" class="logo">
+              <h2 class="title">毕业设计管理系统</h2>
+            </div>
+            <p class="subtitle">欢迎使用我们的系统</p>
+          </div>
+
           <transition name="slide-up">
             <el-form ref="formRef" :model="data.form" :rules="data.rules" class="form-container">
-              <div class="form-title">欢迎登录</div>
 
               <el-form-item prop="username">
-                <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号">
-                  <template #prefix><el-icon><User /></el-icon></template>
+                <el-input size="large" v-model="data.form.username" autocomplete="off" placeholder="请输入账号"
+                          prefix-icon="User">
                 </el-input>
               </el-form-item>
 
               <el-form-item prop="password">
-                <el-input size="large" show-password v-model="data.form.password" autocomplete="off" placeholder="请输入密码">
-                  <template #prefix><el-icon><Lock /></el-icon></template>
+                <el-input size="large" show-password v-model="data.form.password" autocomplete="off"
+                          placeholder="请输入密码" prefix-icon="Lock">
                 </el-input>
               </el-form-item>
 
@@ -25,7 +32,6 @@
                 <el-select size="large" style="width: 100%" v-model="data.form.role" placeholder="选择角色">
                   <el-option label="管理员" value="ADMIN" />
                   <el-option label="学生" value="USER" />
-<!--                  <el-option label="老师" value="TEACHER" />-->
                 </el-select>
               </el-form-item>
 
@@ -75,7 +81,7 @@ const login = () => {
           localStorage.setItem("code_user", JSON.stringify(res.data || {}))
           localStorage.setItem("token", res.data.token)
           ElMessage.success('登录成功')
-          router.push('/manager/home')
+          router.push('/manager/index')
         } else {
           ElMessage.error(res.message)
         }
@@ -116,20 +122,49 @@ const login = () => {
 .login-box {
   z-index: 1;
   width: 420px;
-  background-color: #ffffffdd;
-  border-radius: 12px;
+  background-color: rgba(255, 255, 255, 0.95);
+  border-radius: 16px;
   padding: 40px 35px 35px;
-  box-shadow: 0 10px 35px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
   font-family: 'Inter', sans-serif;
   position: relative;
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
 }
 
-.form-title {
-  margin-bottom: 30px;
-  font-size: 26px;
+.login-header {
   text-align: center;
+  margin-bottom: 30px;
+}
+
+.logo-section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 10px;
+}
+
+.logo {
+  width: 40px;
+  height: 40px;
+  margin-right: 12px;
+}
+
+.title {
+  margin: 0;
+  font-size: 22px;
   color: #333;
   font-weight: 700;
+}
+
+.subtitle {
+  margin: 0;
+  font-size: 14px;
+  color: #666;
+}
+
+.form-container {
+  padding-top: 20px;
 }
 
 .login-btn {
@@ -138,11 +173,21 @@ const login = () => {
   background: linear-gradient(90deg, #5a91ff, #376eff);
   border: none;
   font-weight: bold;
+  height: 48px;
+  font-size: 16px;
+  letter-spacing: 1px;
+  transition: all 0.3s ease;
+}
+
+.login-btn:hover {
+  background: linear-gradient(90deg, #4a81ef, #275eff);
+  transform: translateY(-2px);
+  box-shadow: 0 8px 20px rgba(55, 110, 255, 0.3);
 }
 
 .register-tip {
   margin-top: 20px;
-  text-align: right;
+  text-align: center;
   font-size: 14px;
   color: #666;
 }
@@ -151,6 +196,46 @@ const login = () => {
   color: #376eff;
   text-decoration: none;
   font-weight: 600;
+  position: relative;
+  padding: 4px 0;
+}
+
+.register-tip a::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  width: 0;
+  height: 1px;
+  background: #376eff;
+  transition: width 0.3s ease;
+}
+
+.register-tip a:hover::after {
+  width: 100%;
+}
+
+.el-form-item {
+  margin-bottom: 24px;
+}
+
+.el-input__wrapper {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  transition: all 0.3s ease;
+}
+
+.el-input__wrapper:hover {
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.el-input__wrapper.is-focus {
+  box-shadow: 0 4px 12px rgba(55, 110, 255, 0.2);
+}
+
+.el-select .el-input__wrapper {
+  border-radius: 8px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 }
 
 @keyframes fadeIn {

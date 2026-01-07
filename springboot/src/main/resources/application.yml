@@ -1,19 +1,11 @@
+# 默认激活的环境
+spring:
+  profiles:
+    active: @spring.profiles.active@  # 使用Maven Profile变量
+
+# 通用配置
 server:
   port: 9991
-
-# 数据库配置
-spring:
-  datasource:
-    driver-class-name: com.mysql.cj.jdbc.Driver
-    username: root
-    password: admin
-    url: jdbc:mysql://localhost:3307/intensifiedmycode?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
-  data:
-    redis:
-      host: localhost
-      port: 6379
-      password:
-      database: 0
 
 # 配置mybatis实体和xml映射
 mybatis:

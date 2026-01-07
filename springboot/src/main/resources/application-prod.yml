@@ -1,0 +1,41 @@
+# 生产环境配置
+spring:
+  # 数据库配置
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: prod_user
+    password: ${PROD_DB_PASSWORD:prod_password}  # 使用环境变量，提供默认值
+    url: jdbc:mysql://prod-server:3306/intensifiedmycode_prod?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=true&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+  # Redis配置
+  data:
+    redis:
+      host: prod-redis-server
+      port: 6379
+      password: ${PROD_REDIS_PASSWORD:prod_redis_password}  # 使用环境变量，提供默认值
+      database: 2
+
+# 服务器配置
+server:
+  port: 8080
+
+# 日志级别配置
+logging:
+  level:
+    com.example: warn  # 生产环境设置为warn级别，减少日志量
+    org.springframework: error
+    root: error
+  file:
+    name: logs/prod-app.log  # 生产环境日志输出到文件
+    max-size: 100MB
+    max-history: 30
+
+# 安全配置
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info  # 只暴露健康检查等基本端点
+
+# 生产环境特定配置
+profiles:
+  active: prod

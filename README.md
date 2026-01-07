@@ -245,8 +245,42 @@
     - 构建：`npm run build`
     - 将dist目录下的文件部署到Web服务器（如Nginx）
 
-### Docker部署（可选）
-项目可容器化部署，需要分别构建前后端镜像并配置网络连接。
+### 多环境配置
+项目支持开发环境(dev)、测试环境(test)和生产环境(prod)三种环境配置：
+
+- **开发环境** (默认): 使用本地数据库和Redis，日志级别为debug，便于调试
+- **测试环境**: 使用测试服务器的数据库和Redis，日志级别为info
+- **生产环境**: 使用生产服务器的数据库和Redis，日志级别为warn，输出到文件，安全性更高
+
+#### 激活不同环境的方法：
+
+1. **开发环境** (默认):
+   ```bash
+   mvn spring-boot:run
+   # 或者
+   mvn clean package -Pdev
+   java -jar target/springboot-0.0.1-SNAPSHOT.jar
+   ```
+
+2. **测试环境**:
+   ```bash
+   mvn clean package -Ptest
+   java -jar target/springboot-0.0.1-SNAPSHOT.jar
+   # 或者直接运行
+   java -jar target/springboot-0.0.1-SNAPSHOT.jar --spring.profiles.active=test
+   ```
+
+3. **生产环境**:
+   ```bash
+   mvn clean package -Pprod
+   java -jar target/springboot-0.0.1-SNAPSHOT.jar
+   # 或者直接运行
+   java -jar target/springboot-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod
+   ```
+
+生产环境支持通过环境变量设置密码:
+- `PROD_DB_PASSWORD`: 生产环境数据库密码
+- `PROD_REDIS_PASSWORD`: 生产环境Redis密码
 
 ---
 

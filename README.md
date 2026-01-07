@@ -1,40 +1,28 @@
-# 项目说明文档
+# 毕业设计管理系统
 
-## 强化的脚手架
+## 项目概述
 
-## 目录
+> 本项目是一个基于Spring Boot后端框架与Vue前端框架的现代化管理系统，采用前后端分离架构，适用于毕业设计管理等企业级应用场景。
 
-- [一、项目概述](#一项目概述)
-- [二、目录结构](#二目录结构)
-- [三、系统功能简介](#三系统功能简介)
-- [四、后端模块说明](#四后端模块说明)
-- [五、前端模块说明](#五前端模块说明)
-- [六、数据库设计](#六数据库设计)
-- [七、快速开始](#七快速开始)
-
-## 一、项目概述
-
-> 本项目是一个基于Spring Boot后端框架与Vue前端框架的现代化管理系统，采用前后端分离架构，适用于快速构建企业级应用。
-
-- **后端**：Spring Boot 3.x + MyBatis Plus + MySQL
-- **前端**：Vue3 + Vite + Element Plus
-- **认证**：JWT Token认证 + Redis会话管理
+- **后端**：Spring Boot 3.4.7 + MyBatis + MySQL + JWT
+- **前端**：Vue 3 + Vite + Element Plus
+- **认证**：JWT Token认证机制
 - **日志**：通过AOP实现操作日志记录
 - **其他**：集成Swagger API文档，支持跨域访问
 
 ### 技术栈
 
-| 类型   | 技术/框架                          |
-|------|--------------------------------|
-| 后端   | Spring Boot 3.x / MyBatis Plus |
-| 数据库  | MySQL / Redis                  |
-| 安全认证 | JWT / Spring Security          |
-| 前端   | Vue 3 / Vite / Element Plus    |
-| 工具   | Swagger（API文档）、AOP（日志记录）       |
+| 类型 | 技术/框架 |
+|------|-----------|
+| 后端 | Spring Boot 3.4.7 / MyBatis / Java 17 |
+| 数据库 | MySQL / Redis |
+| 安全认证 | JWT / Spring Security |
+| 前端 | Vue 3 / Vite / Element Plus / Pinia |
+| 工具 | Swagger（API文档）、AOP（日志记录）、Lombok |
 
 ---
 
-## 二、目录结构
+## 目录结构
 
 ```bash
 .
@@ -44,17 +32,19 @@
 │   │       ├── java  # Java源代码
 │   │       │   └── com
 │   │       │       └── example
-│   │       │           ├── annotation    # 自定义注解
-│   │       │           ├── aspect        # AOP切面
-│   │       │           ├── common        # 公共类
-│   │       │           ├── config        # 配置类
-│   │       │           ├── controller    # 控制器
-│   │       │           ├── entity        # 实体类
-│   │       │           ├── exception     # 异常处理
-│   │       │           ├── mapper        # 数据访问层
-│   │       │           ├── security      # 安全相关
-│   │       │           ├── service       # 服务接口及实现
-│   │       │           ├── utils         # 工具类
+│   │       │           ├── annotation    # 自定义注解（审计日志）
+│   │       │           ├── aspect        # AOP切面（审计日志处理）
+│   │       │           ├── common        # 公共类（响应结果封装、枚举）
+│   │       │           ├── config        # 配置类（跨域、JSON配置等）
+│   │       │           ├── controller    # 控制器（用户、管理员、菜单等）
+│   │       │           ├── entity        # 实体类（用户、管理员、菜单等）
+│   │       │           ├── enums         # 枚举类（角色枚举）
+│   │       │           ├── exception     # 异常处理（全局异常处理器）
+│   │       │           ├── mapper        # 数据访问层（MyBatis接口）
+│   │       │           ├── security      # 安全相关（JWT认证过滤器）
+│   │       │           ├── service       # 服务接口及实现（用户、管理员等）
+│   │       │           ├── strategy    # 策略模式（角色策略）
+│   │       │           ├── utils         # 工具类（Token工具类）
 │   │       │           └── SpringbootApplication.java # 应用启动类
 │   │       └── resources # 配置和资源文件
 │   │           ├── mapper    # MyBatis映射文件
@@ -62,11 +52,11 @@
 │   └── pom.xml       # Maven项目配置文件
 ├── vue               # Vue 前端项目
 │   ├── src           # 源码目录
-│   │   ├── api       # 接口调用
-│   │   ├── assets    # 静态资源
-│   │   ├── router    # 路由配置
-│   │   ├── utils     # 工具类
-│   │   ├── views     # 页面组件
+│   │   ├── api       # 接口调用（用户、菜单、认证等API封装）
+│   │   ├── assets    # 静态资源（CSS、图片等）
+│   │   ├── router    # 路由配置（登录、注册、管理页面等）
+│   │   ├── utils     # 工具类（Axios请求封装）
+│   │   ├── views     # 页面组件（登录、注册、管理等页面）
 │   │   ├── App.vue   # 根组件
 │   │   └── main.js   # 应用入口
 │   ├── index.html    # 入口HTML文件
@@ -78,116 +68,221 @@
 └── README.md         # 项目说明文档
 ```
 
-## 三、系统功能简介
+## 核心功能模块
 
-### 用户管理
+### 1. 用户管理模块
+- **用户注册与登录**：支持普通用户注册和登录功能
+- **用户信息维护**：用户可以查看和修改自己的信息
+- **密码修改**：支持用户修改登录密码
+- **分页查询**：支持用户信息的分页展示
 
-- 用户注册与登录（支持邮箱/手机号）
-- 用户信息维护（头像、昵称、联系方式等）
-- 密码修改与找回
-- 角色权限分配
+### 2. 管理员管理模块
+- **管理员登录**：支持管理员登录功能
+- **管理员信息维护**：管理员可以管理自己的信息
+- **密码修改**：支持管理员修改登录密码
+- **用户管理**：管理员可以管理所有用户信息
 
-### 管理员功能
+### 3. 菜单管理模块
+- **角色菜单**：根据用户角色动态加载相应菜单
+- **菜单配置**：支持菜单的增删改查操作
+- **权限控制**：基于角色的菜单访问控制
 
-- 用户管理（增删改查、状态管理）
-- 审计日志管理（操作记录追踪）
-- 通知公告管理（发布、编辑、删除）
-- 系统参数配置
+### 4. 文件管理模块
+- **文件上传**：支持文件上传功能
+- **文件下载**：支持文件下载功能
+- **富文本编辑器**：集成wangEditor，支持图片上传
 
-### 系统功能
+### 5. 安全认证模块
+- **JWT Token**：基于JWT的无状态认证机制
+- **Token验证**：自动验证Token的有效性
+- **角色权限**：基于角色的权限控制
+- **策略模式**：使用策略模式处理不同角色的登录逻辑
 
-- 文件上传与下载（支持本地存储和OSS对象存储）
-- JWT Token认证机制（带自动刷新令牌功能）
-- AOP实现的操作日志记录
-- RESTful API设计规范
-- 多环境配置管理（开发、测试、生产）
+### 6. 审计日志模块
+- **操作记录**：使用AOP记录关键操作日志
+- **日志查询**：支持查询最近的操作日志
+- **自动记录**：通过注解自动记录操作信息
 
-## 三、核心功能模块
-
-### 用户管理
-
-- 注册、登录、修改密码
-- 权限控制（用户/管理员）
-- 账户状态管理（启用/禁用）
-
-### 管理员功能
-
-- 用户管理
-- 日志审计查看
-- 通知公告发布与维护
-- 系统参数设置
-
-### 系统功能
-
-- 文件上传下载（本地/OSS）
-- JWT Token自动刷新机制
-- AOP实现操作日志记录
-- RESTful API规范设计
-- 多环境配置支持（dev/test/prod）
+### 7. 通知管理模块
+- **发送通知**：支持向用户发送通知
+- **获取通知**：用户可以获取自己的通知
+- **标记已读**：支持将通知标记为已读
+- **删除通知**：支持删除通知
 
 ---
 
-## 四、后端模块说明
+## 设计模式与架构特色
 
-| 包名                                                                                                                                     | 功能描述             |
-|----------------------------------------------------------------------------------------------------------------------------------------|------------------|
-| `controller`                                                                                                                           | 接收 HTTP 请求，处理路由  |
-| `service`                                                                                                                              | 核心业务逻辑           |
-| `mapper`                                                                                                                               | 数据库访问接口（MyBatis） |
-| `entity`                                                                                                                               | 数据库实体类           |
-| `dto`                                                                                                                                  | 数据传输对象           |
-| `aspect`                                                                                                                               | 切面编程，用于日志记录      |
-| [config](file://C:\Users\Administrator\Desktop\IntensifiedMyCode\vue\node_modules\unplugin-vue-components\dist\resolvers.js#L636-L636) | 系统配置类            |
-| `security`                                                                                                                             | 安全相关（JWT、权限验证等）  |
-| `exception`                                                                                                                            | 统一异常处理           |
-| `utils`                                                                                                                                | 工具类（TokenUtils等） |
+### 1. 策略模式
+项目使用策略模式处理不同角色的登录和密码更新逻辑：
+- **RoleStrategy**：定义角色策略接口
+- **AdminStrategy**：管理员角色策略实现
+- **UserStrategy**：普通用户角色策略实现
+- **RoleStrategyContext**：策略上下文，根据角色动态选择策略
 
----
+### 2. AOP面向切面编程
+- **审计日志**：使用AOP自动记录操作日志
+- **@AuditLogRecord**：自定义注解标记需要记录日志的方法
+- **AuditLogAspect**：切面类处理日志记录逻辑
 
-## 五、前端模块说明
-
-| 目录                                                                                               | 功能描述                        |
-|--------------------------------------------------------------------------------------------------|-----------------------------|
-| `api`                                                                                            | 封装所有后端接口请求                  |
-| `views`                                                                                          | 页面组件（如 Login.vue, Home.vue） |
-| [router](file://C:\Users\Administrator\Desktop\IntensifiedMyCode\vue\src\router\index.js#L2-L20) | Vue Router 路由配置             |
-| `assets`                                                                                         | 静态资源（CSS、图标等）               |
-| `utils`                                                                                          | 工具函数（如 request.js）          |
-| `components`                                                                                     | 可复用的 UI 组件                  |
+### 3. 分层架构
+- **Controller层**：处理HTTP请求，参数验证
+- **Service层**：核心业务逻辑处理
+- **Mapper层**：数据访问层，与数据库交互
+- **Entity层**：数据模型定义
 
 ---
 
-## 六、数据库设计
+## 数据库设计
 
 主要表包括：
 
-- `user`：用户信息
-- `admin`：管理员信息
-- `audit_log`：操作日志
-- `notification`：系统通知
-- [file](file://cn\hutool\core\io\FileUtil.java#L55-L55)：上传文件记录
+- `user`：用户信息表（用户名、密码、角色、姓名、头像等）
+- `admin`：管理员信息表（用户名、密码、角色、姓名、头像等）
+- `audit_log`：操作日志表（用户名、操作、资源、IP地址、详情等）
+- `notification`：通知表（通知内容、接收者、状态等）
+- `menu`：菜单表（菜单名称、路径、父菜单、权限等）
 
 > SQL脚本位于：`sql/intensifiedmycode.sql`
 
 ---
 
+## 快速开始
 
+### 环境准备
 
-## 七、快速开始
+1. **Java 17+**：确保已安装Java 17或更高版本
+2. **Node.js 18+**：确保已安装Node.js 18或更高版本
+3. **MySQL 5.7+**：确保已安装并启动MySQL数据库
+4. **Redis**：确保已安装并启动Redis服务
 
 ### 后端启动步骤
 
-1. 安装JDK 17+
-2. 使用IDE导入springboot目录作为Maven项目
-3. 执行SQL脚本（位于sql目录）创建数据库
-4. 修改application.yml配置数据库连接信息、Redis配置等
-5. 运行SpringbootApplication.java启动应用
-6. 访问http://localhost:8080/swagger-ui.html 查看API文档
+1. 进入[springboot](file://E:\java\maven_project\IntensifiedMyCode\springboot\src\main\java\com\example\SpringbootApplication.java#L9-L16)目录
+2. 修改[application.yml](file://E:\java\maven_project\IntensifiedMyCode\springboot\src\main\resources\application.yml#L1-L28)中的数据库连接信息：
+   ```yaml
+   spring:
+     datasource:
+       driver-class-name: com.mysql.cj.jdbc.Driver
+       username: root          # 修改为您的数据库用户名
+       password: admin         # 修改为您的数据库密码
+       url: jdbc:mysql://localhost:3307/intensifiedmycode?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+   ```
+3. 执行SQL脚本创建数据库表结构（位于sql目录）
+4. 使用Maven编译项目：`mvn clean install`
+5. 运行[SpringbootApplication.java](file://E:\java\maven_project\IntensifiedMyCode\springboot\src\main\java\com\example\SpringbootApplication.java#L9-L16)启动应用
+6. 后端服务将在 http://localhost:9991 启动
 
 ### 前端启动步骤
 
-1. 安装Node.js 18+
-2. 进入vue目录，执行`npm install`安装依赖
-3. 执行`npm run dev`启动开发服务器
-4. 浏览器访问`http://localhost:3000`查看应用
-5. 默认登录账号：admin/123456
+1. 进入[vue](file://E:\java\maven_project\IntensifiedMyCode\vue\src\main.js#L1-L29)目录
+2. 安装依赖：`npm install`
+3. 修改[src/utils/request.js](file://E:\java\maven_project\IntensifiedMyCode\vue\src\utils\request.js#L1-L49)中的后端API地址：
+   ```javascript
+   let baseURL = 'http://127.0.0.1:9991';  // 确保与后端端口一致
+   ```
+4. 启动开发服务器：`npm run serve` 或 `npm run dev`
+5. 前端应用将在 http://localhost:5173 启动（Vite默认端口）
+
+### 默认账户
+
+- **管理员账号**：admin / 123456
+- **普通用户账号**：user / 123456
+
+---
+
+## 项目特性
+
+### 1. 安全性
+- JWT Token认证，保障接口安全
+- 密码MD5加密存储（管理员）
+- 自定义认证过滤器，验证请求合法性
+- 角色权限控制，防止越权访问
+
+### 2. 可扩展性
+- 策略模式设计，易于扩展新角色
+- 分层架构，各层职责明确
+- 配置化管理，便于环境切换
+
+### 3. 易用性
+- 响应式设计，适配不同屏幕尺寸
+- 主题切换，支持日间/夜间模式
+- 完善的表单验证和错误提示
+- 直观的用户界面设计
+
+### 4. 可维护性
+- 统一的代码风格和命名规范
+- 完整的注释和文档
+- 模块化设计，降低耦合度
+- 标准化的API接口设计
+
+---
+
+## API接口说明
+
+项目集成了Swagger文档，启动后端服务后可访问 http://localhost:9991/swagger-ui.html 查看完整的API文档。
+
+### 主要接口分类：
+- `/user/**`：用户相关接口
+- `/admin/**`：管理员相关接口
+- `/menu/**`：菜单相关接口
+- `/files/**`：文件相关接口
+- `/notification/**`：通知相关接口
+- `/api/audit/**`：审计日志相关接口
+- `/login`、`/register`、`/updatePassword`：认证相关接口
+
+---
+
+## 部署说明
+
+### 生产环境部署
+
+1. **后端部署**：
+    - 打包：`mvn clean package`
+    - 运行：`java -jar target/springboot-0.0.1-SNAPSHOT.jar --spring.profiles.active=prod`
+
+2. **前端部署**：
+    - 构建：`npm run build`
+    - 将dist目录下的文件部署到Web服务器（如Nginx）
+
+### Docker部署（可选）
+项目可容器化部署，需要分别构建前后端镜像并配置网络连接。
+
+---
+
+## 贡献指南
+
+欢迎提交Issue和Pull Request来帮助改进项目。
+
+### 代码规范
+- Java代码遵循阿里巴巴Java开发手册规范
+- 前端代码使用ESLint和Prettier进行代码格式化
+- 提交信息使用约定式提交规范
+
+### 开发流程
+1. Fork项目
+2. 创建功能分支
+3. 提交更改
+4. 发起Pull Request
+
+---
+
+## 许可证
+
+本项目采用 MIT 许可证，详情请参阅 [LICENSE](LICENSE) 文件。
+
+---
+
+## 致谢
+
+感谢以下开源项目的支持：
+- Spring Boot
+- Vue.js
+- Element Plus
+- MyBatis
+- JWT
+- AOP
+- Lombok
+- Hutool
+- PageHelper
+

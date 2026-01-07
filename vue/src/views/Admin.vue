@@ -57,7 +57,7 @@
         </el-form-item>
         <el-form-item prop="avatar" label="头像">
           <el-upload
-              action="http://localhost:9999/files/upload"
+              :action="fileUploadUrl"
               :headers="{ token: data.user.token }"
               :on-success="handleFileSuccess"
               list-type="picture"
@@ -79,7 +79,7 @@
 <script setup>
 import { reactive, ref } from "vue";
 import {Search, Edit, Delete} from "@element-plus/icons-vue";
-import request from "@/utils/request.js";
+import request, { fileUploadUrl } from "@/utils/request.js";
 import {ElMessage,ElMessageBox} from "element-plus";
 
 // 创建一个响应式数据对象，用于存储用户相关数据和操作状态

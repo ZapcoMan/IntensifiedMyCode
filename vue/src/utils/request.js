@@ -47,4 +47,7 @@ request.interceptors.response.use(
     }
 )
 
+// 导出文件上传基础URL
+export const fileUploadUrl = `${baseURL}/files/upload`;
+
 export default request

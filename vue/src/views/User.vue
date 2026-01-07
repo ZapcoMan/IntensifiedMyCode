@@ -57,7 +57,7 @@
         </el-form-item>
         <el-form-item prop="avatar" label="头像">
           <el-upload
-              action="http://localhost:9999/files/upload"
+              :action="fileUploadUrl"
               :headers="{ token: data.user.token }"
               :on-success="handleFileSuccess"
               list-type="picture"
@@ -80,6 +80,7 @@
 import { reactive, ref } from 'vue'
 import { Search, Edit, Delete } from '@element-plus/icons-vue'
 import { ElMessage, ElMessageBox } from 'element-plus'
+import { fileUploadUrl } from '@/utils/request'
 import {
   fetchUsers,
   addUser,

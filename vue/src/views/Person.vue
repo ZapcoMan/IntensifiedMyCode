@@ -12,7 +12,7 @@
             <img v-else src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" class="avatar-img" alt="默认头像">
           </div>
           <el-upload
-            action="http://localhost:9999/files/upload"
+            :action="fileUploadUrl"
             :headers="{ token: data.user.token }"
             :on-success="handleFileSuccess"
             list-type="picture"
@@ -52,7 +52,7 @@
 <script setup>
 import { reactive } from "vue";
 import { ElMessage } from "element-plus";
-import request from "@/utils/request.js";
+import request, { fileUploadUrl } from "@/utils/request.js";
 
 const data = reactive({
   user: JSON.parse(localStorage.getItem('code_user') || "{}")

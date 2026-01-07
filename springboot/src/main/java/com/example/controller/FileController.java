@@ -5,10 +5,12 @@ import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.lang.Dict;
 import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
+import com.example.config.FileUploadConfig;
 import com.example.exception.CustomerException;
 import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -22,6 +24,9 @@ import java.util.Map;
 @RequestMapping("/files")
 public class FileController {
 
+    @Autowired
+    private FileUploadConfig fileUploadConfig;
+
     /**
      * 文件上传
      */
@@ -30,15 +35,21 @@ public class FileController {
     @PostMapping("/upload")
     public R upload(@RequestParam("file") MultipartFile file) throws Exception {
         // 找到文件的位置
-        String filePath = System.getProperty("user.dir") + "/files/";
+        String filePath = fileUploadConfig.getFilePath();
         if (!FileUtil.isDirectory(filePath)) {
             FileUtil.mkdir(filePath);
         }
         byte[] bytes = file.getBytes();
-        String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();  // 文件的原始名称
+        String originalFileName = file.getOriginalFilename();
+        String fileExtension = "";
+        if (originalFileName != null && originalFileName.contains(".")) {
+            fileExtension = originalFileName.substring(originalFileName.lastIndexOf("."));
+        }
+        // 使用纯时间戳作为文件名
+        String fileName = System.currentTimeMillis() + fileExtension;
         // 写入文件
         FileUtil.writeBytes(bytes, filePath + fileName);
-        String url = "http://localhost:9991/files/download/" + fileName;
+        String url = fileUploadConfig.getBaseUrl() + "/files/download/" + fileName;
         return R.success(url);
     }
 
@@ -51,7 +62,7 @@ public class FileController {
     @GetMapping("/download/{fileName}")
     public void download(@PathVariable String fileName, HttpServletResponse response) throws Exception {
         // 找到文件的位置
-        String filePath = System.getProperty("user.dir") + "/files/";  // 获取到当前项目的根路径（mycode的绝对路径D:\IdeaProjects\mycode）
+        String filePath = fileUploadConfig.getFilePath();  // 获取配置的文件路径
         String realPath = filePath + fileName;  //  D:\IdeaProjects\mycode\files\xxx.jpg
         boolean exist = FileUtil.exist(realPath);
         if (!exist) {
@@ -75,20 +86,25 @@ public class FileController {
     public R wangEditorUpload(MultipartFile file) {
         String flag = System.currentTimeMillis() + "";
         String fileName = file.getOriginalFilename();
+        String fileExtension = "";
+        if (fileName != null && fileName.contains(".")) {
+            fileExtension = fileName.substring(fileName.lastIndexOf("."));
+        }
+        String newFileName = flag + fileExtension;
         try {
-            String filePath = System.getProperty("user.dir") + "/files/";
-            // 文件存储形式：时间戳-文件名
-            FileUtil.writeBytes(file.getBytes(), filePath + flag + "-" + fileName);
-            System.out.println(fileName + "--上传成功");
+            String filePath = fileUploadConfig.getFilePath();
+            // 文件存储形式：时间戳
+            FileUtil.writeBytes(file.getBytes(), filePath + newFileName);
+            System.out.println(newFileName + "--上传成功");
             Thread.sleep(1L);
         } catch (Exception e) {
-            System.err.println(fileName + "--文件上传失败");
+            System.err.println(newFileName + "--文件上传失败");
         }
-        String http = "http://localhost:9999/files/download/";
+        String http = fileUploadConfig.getBaseUrl() + "/files/download/";
         Map<String, Object> resMap = new HashMap<>();
         // wangEditor上传图片成功后， 需要返回的参数
         resMap.put("errno", 0);
-        resMap.put("data", CollUtil.newArrayList(Dict.create().set("url", http + flag + "-" + fileName)));
+        resMap.put("data", CollUtil.newArrayList(Dict.create().set("url", http + newFileName)));
         return R.success(resMap);
     }
 

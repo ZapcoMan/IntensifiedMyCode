@@ -21,3 +21,4 @@ file:
   upload:
     base-url: http://127.0.0.1:9991
     path: ${user.dir}/files/
+#    path: ./files/

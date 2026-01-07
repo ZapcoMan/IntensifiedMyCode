@@ -1,18 +1,5 @@
 <template>
   <div class="home-container">
-    <div class="header-tools">
-      <el-switch
-        v-model="darkMode"
-        class="theme-switch"
-        active-text="夜间"
-        inactive-text="日间"
-        inline-prompt
-        active-icon="Moon"
-        inactive-icon="Sunny"
-        @change="toggleTheme"
-      />
-    </div>
-
     <div class="welcome-card">
       <div class="welcome-header">
         <h1>欢迎使用管理系统</h1>

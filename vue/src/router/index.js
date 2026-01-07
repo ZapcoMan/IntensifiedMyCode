@@ -29,7 +29,7 @@ const router = createRouter({
     // 登录路由配置
     { path: '/login', component: () =>import('../views/Login.vue')},
     // 注册路由配置
-    { path: '/register', component: () =>import('../views/Register.vue')},
+    // { path: '/register', component: () =>import('../views/Register.vue')},
     // 404页面路由配置
     { path: '/notfound', component: () =>import('../views/404.vue'),},
     // 捕获所有未匹配到的路径并重定向到404页面

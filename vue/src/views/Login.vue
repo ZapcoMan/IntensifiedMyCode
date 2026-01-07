@@ -8,7 +8,7 @@
           <div class="login-header">
             <div class="logo-section">
               <img src="@/assets/imgs/logo.png" alt="Logo" class="logo">
-              <h2 class="title">毕业设计管理系统</h2>
+              <h2 class="title">增强型脚手架</h2>
             </div>
             <p class="subtitle">欢迎使用我们的系统</p>
           </div>
@@ -44,9 +44,7 @@
                 <el-icon><Key /></el-icon> 登 录
               </el-button>
 
-              <div class="register-tip">
-                还没有账号？<a href="/register">立即注册</a>
-              </div>
+
             </el-form>
           </transition>
         </div>

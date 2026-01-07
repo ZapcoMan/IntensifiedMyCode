@@ -5,7 +5,7 @@
       <div class="header-left">
         <div class="logo-container">
           <img class="logo" src="@/assets/imgs/logo.png" alt="Logo">
-          <span class="logo-text">毕业设计</span>
+          <span class="logo-text">增强型脚手架</span>
         </div>
       </div>
       <div class="header-center">

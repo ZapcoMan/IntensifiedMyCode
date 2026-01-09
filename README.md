@@ -8,6 +8,7 @@
 - **前端**：Vue 3 + Vite + Element Plus
 - **认证**：JWT Token认证机制
 - **日志**：通过AOP实现操作日志记录
+- **缓存**：集成Redis缓存优化系统性能
 - **其他**：集成Swagger API文档，支持跨域访问
 
 ### 技术栈
@@ -44,7 +45,7 @@
 │   │       │           ├── security      # 安全相关（JWT认证过滤器）
 │   │       │           ├── service       # 服务接口及实现（用户、管理员等）
 │   │       │           ├── strategy    # 策略模式（角色策略）
-│   │       │           ├── utils         # 工具类（Token工具类）
+│   │       │           ├── utils         # 工具类（Token工具类、Redis工具类）
 │   │       │           └── SpringbootApplication.java # 应用启动类
 │   │       └── resources # 配置和资源文件
 │   │           ├── mapper    # MyBatis映射文件
@@ -109,6 +110,12 @@
 - **标记已读**：支持将通知标记为已读
 - **删除通知**：支持删除通知
 
+### 8. 缓存优化模块
+- **Redis集成**：集成Redis缓存优化系统性能
+- **数据缓存**：对用户信息、菜单数据等高频访问数据进行缓存
+- **缓存更新**：数据更新时自动清除相关缓存
+- **缓存策略**：实现合理的缓存过期策略
+
 ---
 
 ## 设计模式与架构特色
@@ -130,6 +137,11 @@
 - **Service层**：核心业务逻辑处理
 - **Mapper层**：数据访问层，与数据库交互
 - **Entity层**：数据模型定义
+
+### 4. 缓存架构
+- **Redis配置**：集成Redis作为分布式缓存
+- **缓存工具类**：提供统一的缓存操作接口
+- **缓存策略**：在业务层实现数据缓存和更新
 
 ---
 
@@ -168,10 +180,20 @@
        password: admin         # 修改为您的数据库密码
        url: jdbc:mysql://localhost:3307/intensifiedmycode?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
    ```
-3. 执行SQL脚本创建数据库表结构（位于sql目录）
-4. 使用Maven编译项目：`mvn clean install`
-5. 运行[SpringbootApplication.java](file://E:\java\maven_project\IntensifiedMyCode\springboot\src\main\java\com\example\SpringbootApplication.java#L9-L16)启动应用
-6. 后端服务将在 http://localhost:9991 启动
+3. 配置Redis连接信息（默认配置）：
+   ```yaml
+   spring:
+     data:
+       redis:
+         host: localhost
+         port: 6379
+         password: 
+         database: 0
+   ```
+4. 执行SQL脚本创建数据库表结构（位于sql目录）
+5. 使用Maven编译项目：`mvn clean install`
+6. 运行[SpringbootApplication.java](file://E:\java\maven_project\IntensifiedMyCode\springboot\src\main\java\com\example\SpringbootApplication.java#L9-L16)启动应用
+7. 后端服务将在 http://localhost:9991 启动
 
 ### 前端启动步骤
 
@@ -199,18 +221,23 @@
 - 自定义认证过滤器，验证请求合法性
 - 角色权限控制，防止越权访问
 
-### 2. 可扩展性
+### 2. 性能优化
+- Redis缓存集成，优化高频数据访问性能
+- 缓存策略设计，提升系统响应速度
+- 数据库查询优化，减少不必要的数据库操作
+
+### 3. 可扩展性
 - 策略模式设计，易于扩展新角色
 - 分层架构，各层职责明确
 - 配置化管理，便于环境切换
 
-### 3. 易用性
+### 4. 易用性
 - 响应式设计，适配不同屏幕尺寸
 - 主题切换，支持日间/夜间模式
 - 完善的表单验证和错误提示
 - 直观的用户界面设计
 
-### 4. 可维护性
+### 5. 可维护性
 - 统一的代码风格和命名规范
 - 完整的注释和文档
 - 模块化设计，降低耦合度
@@ -319,4 +346,4 @@
 - Lombok
 - Hutool
 - PageHelper
-
+- Redis

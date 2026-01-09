@@ -68,7 +68,6 @@ const data = reactive({
   rules: {
     username: [
       { required: true, message: '请输入账号', trigger: 'blur' },
-      { min: 6, message: '账号最少6位', trigger: 'blur' },
     ],
     password: [
       { required: true, message: '请输入密码', trigger: 'blur' }

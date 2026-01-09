@@ -25,5 +25,10 @@
     <update id="deleteLogical">
         UPDATE notification SET status = 'DELETED' WHERE id = #{id}
     </update>
+    
+    <!-- 根据ID查询通知 -->
+    <select id="findById" resultType="com.example.entity.Notification">
+        SELECT * FROM notification WHERE id = #{id}
+    </select>
 
 </mapper>

@@ -6,20 +6,25 @@ import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
 import com.example.service.AdminService;
+import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
 import jakarta.annotation.Resource;
-import org.springframework.stereotype.Service;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
-import cn.hutool.crypto.digest.DigestUtil;
+import org.springframework.stereotype.Service;
+
+
 import java.util.List;
 
 @Service
 public class AdminServiceImpl implements AdminService {
 
     @Resource AdminMapper adminMapper;
+    @Resource
+    RedisUtils redisUtils;
+    
     // 日志对象，用于记录系统日志
     private static final Log log = LogFactory.getLog(AdminServiceImpl.class);
 
@@ -50,6 +55,10 @@ public class AdminServiceImpl implements AdminService {
      */
     public void update(Admin admin) {
         adminMapper.updateById(admin);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + admin.getId() + ":SUPER_ADMIN";
+        redisUtils.remove(cacheKey);
     }
 
     /**
@@ -59,6 +68,10 @@ public class AdminServiceImpl implements AdminService {
      */
     public void deleteById(Integer id) {
         adminMapper.deleteById(id);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + id + ":SUPER_ADMIN";
+        redisUtils.remove(cacheKey);
     }
 
     /**
@@ -79,7 +92,20 @@ public class AdminServiceImpl implements AdminService {
      * @return 查询到的管理员对象
      */
     public Admin selectById(String id) {
-        return adminMapper.selectById(id);
+        // 先从Redis获取用户信息
+        String cacheKey = "user:info:" + id + ":SUPER_ADMIN";
+        Admin admin = redisUtils.get(cacheKey);
+        
+        if (admin == null) {
+            // 如果Redis中没有，则从数据库查询
+            admin = adminMapper.selectById(id);
+            if (admin != null) {
+                // 将用户信息缓存到Redis
+                redisUtils.set(cacheKey, admin, 30, java.util.concurrent.TimeUnit.MINUTES);
+            }
+        }
+        
+        return admin;
     }
 
     /**
@@ -125,7 +151,7 @@ public class AdminServiceImpl implements AdminService {
         String dbAdminPassword = dbAdmin.getPassword();
 
         // 生成输入密码的摘要
-        String inputHash = DigestUtil.md5Hex(InputPassWord);
+        String inputHash = cn.hutool.crypto.digest.DigestUtil.md5Hex(InputPassWord);
         // 验证密码是否匹配
         boolean isValid = dbAdminPassword.equals(inputHash);
         log.info("密码验证"+isValid+"一致");
@@ -138,6 +164,10 @@ public class AdminServiceImpl implements AdminService {
         // 创建token并返回给前端
         String token = TokenUtils.createToken(dbAdmin.getId() + "-" + "SUPER_ADMIN", dbAdmin.getPassword());
         dbAdmin.setToken(token);
+        
+        // 将用户信息缓存到Redis
+        String cacheKey = "user:info:" + dbAdmin.getId() + ":SUPER_ADMIN";
+        redisUtils.set(cacheKey, dbAdmin, 30, java.util.concurrent.TimeUnit.MINUTES);
 
         // 返回登录成功的管理员对象
         return dbAdmin;
@@ -163,11 +193,13 @@ public class AdminServiceImpl implements AdminService {
         }
         //开始更新密码
         //MD5 加密
-        account.setNewpassword(DigestUtil.md5Hex(account.getNewpassword()));
+        account.setNewpassword(cn.hutool.crypto.digest.DigestUtil.md5Hex(account.getNewpassword()));
         Admin admin = adminMapper.selectById(currentUser.getId().toString());
         admin.setPassword(account.getNewpassword());
         adminMapper.updateById(admin);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + currentUser.getId() + ":SUPER_ADMIN";
+        redisUtils.remove(cacheKey);
     }
-
-
 }

@@ -6,18 +6,25 @@ import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
 import com.example.service.UserService;
+import com.example.utils.DistributedLockUtils;
+import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
 import com.github.pagehelper.PageInfo;
-import jakarta.annotation.Resource;
 import org.springframework.stereotype.Service;
 
+import jakarta.annotation.Resource;
 import java.util.List;
+
 @Service
 public class UserServiceImpl implements UserService {
 
     @Resource
     UserMapper userMapper;
+    @Resource
+    RedisUtils redisUtils;
+    @Resource
+    DistributedLockUtils distributedLockUtils;
 
     /**
      * 添加新用户
@@ -53,6 +60,10 @@ public class UserServiceImpl implements UserService {
     public void update(User user) {
         // 根据用户ID更新用户信息
         userMapper.updateById(user);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + user.getId() + ":USER";
+        redisUtils.remove(cacheKey);
     }
 
     /**
@@ -63,6 +74,10 @@ public class UserServiceImpl implements UserService {
     public void deleteById(Integer id) {
         // 根据用户ID删除用户
         userMapper.deleteById(id);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + id + ":USER";
+        redisUtils.remove(cacheKey);
     }
 
     /**
@@ -111,8 +126,20 @@ public class UserServiceImpl implements UserService {
      * @throws CustomerException 如果用户名已存在，则抛出异常
      */
     public void register(User user) {
-        // 调用添加用户方法实现注册
-        this.add(user);
+        // 使用分布式锁防止重复注册
+        String lockKey = "user:register:" + user.getUsername();
+        String requestId = String.valueOf(System.currentTimeMillis());
+        
+        if (distributedLockUtils.tryLock(lockKey, requestId, 10)) {
+            try {
+                this.add(user);
+            } finally {
+                // 释放锁
+                distributedLockUtils.releaseLock(lockKey, requestId);
+            }
+        } else {
+            throw new CustomerException("系统繁忙，请稍后再试");
+        }
     }
 
     /**
@@ -135,6 +162,11 @@ public class UserServiceImpl implements UserService {
         // 创建token并返回给前端
         String token = TokenUtils.createToken(dbUser.getId() + "-" + "USER", dbUser.getPassword());
         dbUser.setToken(token);
+        
+        // 将用户信息缓存到Redis
+        String cacheKey = "user:info:" + dbUser.getId() + ":USER";
+        redisUtils.set(cacheKey, dbUser, 30, java.util.concurrent.TimeUnit.MINUTES);
+        
         // 返回登录成功的用户信息
         return dbUser;
     }
@@ -146,8 +178,20 @@ public class UserServiceImpl implements UserService {
      * @return 用户信息
      */
     public User selectById(String id) {
-        // 根据用户ID查询用户信息
-        return userMapper.selectById(id);
+        // 先从Redis获取用户信息
+        String cacheKey = "user:info:" + id + ":USER";
+        User user = redisUtils.get(cacheKey);
+        
+        if (user == null) {
+            // 如果Redis中没有，则从数据库查询
+            user = userMapper.selectById(id);
+            if (user != null) {
+                // 将用户信息缓存到Redis
+                redisUtils.set(cacheKey, user, 30, java.util.concurrent.TimeUnit.MINUTES);
+            }
+        }
+        
+        return user;
     }
 
     /**
@@ -170,6 +214,10 @@ public class UserServiceImpl implements UserService {
         User user = userMapper.selectById(currentUser.getId().toString());
         user.setPassword(account.getNewpassword());
         userMapper.updateById(user);
+        
+        // 清除Redis中的缓存
+        String cacheKey = "user:info:" + currentUser.getId() + ":USER";
+        redisUtils.remove(cacheKey);
     }
 
 }

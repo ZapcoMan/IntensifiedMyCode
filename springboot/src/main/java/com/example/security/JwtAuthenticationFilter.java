@@ -5,31 +5,34 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.entity.Account;
+import com.example.enums.RoleEnum;
 import com.example.exception.CustomerException;
 import com.example.service.AccountService;
+import com.example.utils.RedisUtils;
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
+
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.io.IOException;
 import java.util.*;
 
-/**
- * JWT认证过滤器，继承自OncePerRequestFilter
- * 用于在请求处理前进行JWT token验证，以确保用户身份的合法性
- */
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Resource
     private List<AccountService> accountServices;
+
+    @Resource
+    private RedisUtils redisUtils;
 
     // 服务映射，根据角色代码获取对应的AccountService实现类
     private final Map<String, AccountService> serviceMap = new HashMap<>();
@@ -92,13 +95,24 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             String[] split = JWT.decode(token).getAudience().get(0).split("-");
             String userId = split[0];
             String role = split[1];
-            // 根据角色获取对应的AccountService实现类
-            AccountService service = serviceMap.get(role);
-            if (service == null) throw new CustomerException("401", "非法角色");
 
-            // 根据用户ID查询账户信息
-            Account account = service.selectById(userId);
-            if (account == null) throw new CustomerException("401", "用户不存在");
+            // 构建Redis缓存键
+            String cacheKey = "user:info:" + userId + ":" + role;
+
+            // 先从Redis获取账户信息
+            Account account = redisUtils.get(cacheKey);
+
+            if (account == null) {
+                // 如果Redis中没有，则从数据库查询
+                AccountService service = serviceMap.get(role);
+                if (service == null) throw new CustomerException("401", "非法角色");
+
+                account = service.selectById(userId);
+                if (account == null) throw new CustomerException("401", "用户不存在");
+
+                // 将账户信息缓存到Redis，设置有效期为30分钟
+                redisUtils.set(cacheKey, account, 30, java.util.concurrent.TimeUnit.MINUTES);
+            }
 
             // 使用账户密码作为密钥验证token
             JWTVerifier verifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();

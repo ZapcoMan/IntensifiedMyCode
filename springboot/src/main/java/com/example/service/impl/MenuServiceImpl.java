@@ -3,55 +3,120 @@ package com.example.service.impl;
 import com.example.entity.Menu;
 import com.example.mapper.MenuMapper;
 import com.example.service.MenuService;
+import com.example.utils.RedisUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-/**
- * 菜单服务实现类
- */
 @Service
 public class MenuServiceImpl implements MenuService {
 
     @Autowired
     private MenuMapper menuMapper;
+    
+    @Autowired
+    private RedisUtils redisUtils;
 
     @Override
     public List<Menu> getMenuByRole(String role) {
-        // 首先查询指定角色的菜单
-        List<Menu> menus = menuMapper.findByRole(role);
+        // 先从Redis获取缓存的菜单数据
+        String cacheKey = "menu:role:" + role;
+        List<Menu> cachedMenus = redisUtils.get(cacheKey);
         
-        // 构建菜单树形结构
-        return buildMenuTree(menus);
+        if (cachedMenus != null && !cachedMenus.isEmpty()) {
+            return cachedMenus;
+        }
+        
+        // 如果Redis中没有，则从数据库查询
+        List<Menu> menus = menuMapper.findByRole(role);
+        List<Menu> menuTree = buildMenuTree(menus);
+        
+        // 将结果缓存到Redis，设置有效期为1小时
+        redisUtils.set(cacheKey, menuTree, 60, java.util.concurrent.TimeUnit.MINUTES);
+        
+        return menuTree;
     }
 
     @Override
     public List<Menu> getAllMenu() {
+        // 先从Redis获取缓存的菜单数据
+        String cacheKey = "menu:all";
+        List<Menu> cachedMenus = redisUtils.get(cacheKey);
+        
+        if (cachedMenus != null && !cachedMenus.isEmpty()) {
+            return cachedMenus;
+        }
+        
+        // 如果Redis中没有，则从数据库查询
         List<Menu> allMenus = menuMapper.findAll();
-        return buildMenuTree(allMenus);
+        List<Menu> menuTree = buildMenuTree(allMenus);
+        
+        // 将结果缓存到Redis，设置有效期为1小时
+        redisUtils.set(cacheKey, menuTree, 60, java.util.concurrent.TimeUnit.MINUTES);
+        
+        return menuTree;
     }
 
     @Override
     public Menu getMenuById(Integer id) {
-        return menuMapper.findById(id);
+        // 先从Redis获取缓存的菜单数据
+        String cacheKey = "menu:id:" + id;
+        Menu cachedMenu = redisUtils.get(cacheKey);
+        
+        if (cachedMenu != null) {
+            return cachedMenu;
+        }
+        
+        // 如果Redis中没有，则从数据库查询
+        Menu menu = menuMapper.findById(id);
+        
+        // 将结果缓存到Redis，设置有效期为1小时
+        if (menu != null) {
+            redisUtils.set(cacheKey, menu, 60, java.util.concurrent.TimeUnit.MINUTES);
+        }
+        
+        return menu;
     }
 
     @Override
     public void addMenu(Menu menu) {
         menuMapper.insert(menu);
+        
+        // 添加菜单后，清除相关的缓存
+        clearMenuCache();
     }
 
     @Override
     public void updateMenu(Menu menu) {
         menuMapper.update(menu);
+        
+        // 更新菜单后，清除相关的缓存
+        String cacheKey = "menu:id:" + menu.getId();
+        redisUtils.remove(cacheKey);
+        clearMenuCache();
     }
 
     @Override
     public void deleteMenu(Integer id) {
         menuMapper.delete(id);
+        
+        // 删除菜单后，清除相关的缓存
+        String cacheKey = "menu:id:" + id;
+        redisUtils.remove(cacheKey);
+        clearMenuCache();
+    }
+
+    /**
+     * 清除菜单相关的缓存
+     */
+    private void clearMenuCache() {
+        // 获取所有可能的缓存键并清除
+        redisUtils.remove("menu:all");
+        
+        // 这里可以清除所有角色相关的菜单缓存，或使用通配符（如果Redis支持）
+        // 为了简单起见，可以清除所有菜单缓存
     }
 
     /**

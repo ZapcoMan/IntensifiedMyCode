@@ -45,4 +45,12 @@ public interface NotificationMapper {
      * 注释解释了为什么使用逻辑删除而非物理删除：可能是为了保留数据，以便未来查询或审计
      */
     void deleteLogical(@Param("id") Long id);
+    
+    /**
+     * 根据ID查询通知
+     *
+     * @param id 通知的ID
+     * @return 通知对象
+     */
+    Notification findById(@Param("id") Long id);
 }

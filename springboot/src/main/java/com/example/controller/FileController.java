@@ -10,6 +10,8 @@ import com.example.exception.CustomerException;
 import io.swagger.annotations.ApiOperation;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
+import org.apache.commons.logging.Log;
+import org.apache.commons.logging.LogFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -26,6 +28,7 @@ public class FileController {
 
     @Autowired
     private FileUploadConfig fileUploadConfig;
+    private static final Log log = LogFactory.getLog(FileController.class);
 
     /**
      * 文件上传
@@ -55,27 +58,33 @@ public class FileController {
 
     /**
      * 文件下载
-     * 下载路径："<a href="http://localhost:9999/files/download/404.jpg">...</a>"
+     * 下载路径："http://localhost:9999/files/download/404.jpg"
      */
     @ApiOperation("文件下载")
     @AuditLogRecord(action = "文件下载", resource = "文件")
     @GetMapping("/download/{fileName}")
-    public void download(@PathVariable String fileName, HttpServletResponse response) throws Exception {
+    public R download(@PathVariable String fileName, HttpServletResponse response) throws Exception {
         // 找到文件的位置
         String filePath = fileUploadConfig.getFilePath();  // 获取配置的文件路径
         String realPath = filePath + fileName;  //  D:\IdeaProjects\mycode\files\xxx.jpg
         boolean exist = FileUtil.exist(realPath);
         if (!exist) {
-            throw new CustomerException("文件不存在");
+            log.error("文件不存在: " + realPath);
+            return R.error("文件不存在");
         }
         // 读取文件的字节流
         byte[] bytes = FileUtil.readBytes(realPath);
         ServletOutputStream os = response.getOutputStream();
+        // 设置响应头
+        response.setContentType("application/octet-stream");
+        response.setHeader("Content-Disposition", "attachment; filename=\"" + fileName + "\"");
         // 输出流对象把文件写出到客户端
         os.write(bytes);
         os.flush();
         os.close();
+        return R.ok();
     }
+
 
     /**
      * wang-editor编辑器文件上传接口

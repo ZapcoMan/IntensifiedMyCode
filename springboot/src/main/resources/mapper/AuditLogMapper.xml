@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 定义一个Mapper，命名空间为com.example.mapper.AuditLogMapper -->
+<mapper namespace="com.example.mapper.AuditLogMapper">
+
+    <!-- 定义一个插入操作，ID为insert -->
+    <insert id="insert">
+        <!-- 向audit_log表中插入一条新记录 -->
+        INSERT INTO audit_log(username, action, resource, ip_address, details, created_at)
+        VALUES(#{username}, #{action}, #{resource}, #{ipAddress}, #{details}, NOW())
+    </insert>
+
+    <!-- 选择最近的审计日志记录 -->
+    <select id="selectRecent" resultType="com.example.entity.AuditLog">
+        SELECT * FROM audit_log ORDER BY created_at DESC LIMIT #{limit}
+    </select>
+
+</mapper>

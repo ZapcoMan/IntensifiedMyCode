@@ -33,4 +33,19 @@
         where id = #{id}
     </update>
 
+    <!-- 根据用户名查询管理员信息 -->
+    <select id="selectByUsername" resultType="com.example.entity.Admin">
+        select * from `admin` where username = #{username}
+    </select>
+
+    <!-- 根据ID删除管理员记录 -->
+    <delete id="deleteById">
+        delete from `admin` where id = #{id}
+    </delete>
+
+    <!-- 根据ID查询管理员信息 -->
+    <select id="selectById" resultType="com.example.entity.Admin">
+        select * from `admin` where id = #{id}
+    </select>
+
 </mapper>

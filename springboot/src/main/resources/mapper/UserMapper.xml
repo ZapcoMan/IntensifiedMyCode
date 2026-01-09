@@ -36,4 +36,19 @@
         where id = #{id}
     </update>
 
+    <!-- 根据用户名查询用户信息 -->
+    <select id="selectByUsername" resultType="com.example.entity.User">
+        select * from `user` where username = #{username}
+    </select>
+
+    <!-- 根据用户ID删除用户信息 -->
+    <delete id="deleteById">
+        delete from `user` where id = #{id}
+    </delete>
+
+    <!-- 根据用户ID查询用户信息 -->
+    <select id="selectById" resultType="com.example.entity.User">
+        select * from `user` where id = #{id}
+    </select>
+
 </mapper>

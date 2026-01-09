@@ -71,7 +71,7 @@ public class TokenUtils {
         String userId = split[0];
         String role = split[1];
         if ("SUPER_ADMIN".equals(role)) {
-            return staticAdminServiceImpl.selectById(userId);
+            return staticUserServiceImpl.selectById(userId);
         } else if ("USER".equals(role)) {
             return staticUserServiceImpl.selectById(userId);
         }

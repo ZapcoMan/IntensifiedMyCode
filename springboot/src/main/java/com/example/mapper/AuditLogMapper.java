@@ -1,10 +1,8 @@
 package com.example.mapper;
 
 import com.example.entity.AuditLog;
-import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
-import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
@@ -19,8 +17,6 @@ public interface AuditLogMapper {
      *
      * @param log 审计日志对象，包含要插入记录的信息
      */
-    @Insert("INSERT INTO audit_log(username, action, resource, ip_address, details, created_at) " +
-            "VALUES(#{username}, #{action}, #{resource}, #{ipAddress}, #{details}, NOW())")
     void insert(AuditLog log);
 
     /**
@@ -29,7 +25,5 @@ public interface AuditLogMapper {
      * @param limit 限制返回的记录数量
      * @return 最近的审计日志记录列表
      */
-    @Select("SELECT * FROM audit_log ORDER BY created_at DESC LIMIT #{limit}")
     List<AuditLog> selectRecent(@Param("limit") int limit);
 }
-

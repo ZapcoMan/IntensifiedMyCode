@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<!-- 定义一个Mapper，命名空间为com.example.mapper.NotificationMapper -->
+<mapper namespace="com.example.mapper.NotificationMapper">
+
+    <!-- 插入一条新的通知记录到数据库中 -->
+    <insert id="insert">
+        INSERT INTO notification(user_id, type, title, content, status, created_at)
+        VALUES(#{userId}, #{type}, #{title}, #{content}, 'UNREAD', NOW())
+    </insert>
+
+    <!-- 根据用户ID查找该用户的所有未删除的通知，并按照创建时间降序排列 -->
+    <select id="findByUser" resultType="com.example.entity.Notification">
+        SELECT * FROM notification WHERE user_id = #{userId} AND status != 'DELETED' ORDER BY created_at DESC
+    </select>
+
+    <!-- 将指定通知标记为已读 -->
+    <update id="markAsRead">
+        UPDATE notification SET status = 'READ', read_at = NOW() WHERE id = #{id}
+    </update>
+
+    <!-- 逻辑删除通知记录，即在数据库中标记通知为已删除状态，而不是物理删除 -->
+    <update id="deleteLogical">
+        UPDATE notification SET status = 'DELETED' WHERE id = #{id}
+    </update>
+
+</mapper>

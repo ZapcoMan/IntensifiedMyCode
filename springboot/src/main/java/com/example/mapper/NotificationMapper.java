@@ -1,7 +1,8 @@
 package com.example.mapper;
 
 import com.example.entity.Notification;
-import org.apache.ibatis.annotations.*;
+import org.apache.ibatis.annotations.Mapper;
+import org.apache.ibatis.annotations.Param;
 
 import java.util.List;
 
@@ -18,8 +19,6 @@ public interface NotificationMapper {
      * @param notification 要插入的通知对象，包含用户ID、通知类型、标题、内容等信息
      * 注释解释了为什么使用NOW()函数：为了自动记录通知的创建时间
      */
-    @Insert("INSERT INTO notification(user_id, type, title, content, status, created_at) " +
-            "VALUES(#{userId}, #{type}, #{title}, #{content}, 'UNREAD', NOW())")
     void insert(Notification notification);
 
     /**
@@ -29,7 +28,6 @@ public interface NotificationMapper {
      * @return 返回一个通知列表，包含所有符合条件的通知对象
      * 注释解释了查询条件和排序方式：为了确保只获取未删除的通知，并且最新创建的通知排在前面
      */
-    @Select("SELECT * FROM notification WHERE user_id = #{userId} AND status != 'DELETED' ORDER BY created_at DESC")
     List<Notification> findByUser(@Param("userId") Long userId);
 
     /**
@@ -38,7 +36,6 @@ public interface NotificationMapper {
      * @param id 通知的ID，用于标识要标记为已读的通知
      * 注释解释了更新操作的目的：记录通知的阅读状态和阅读时间
      */
-    @Update("UPDATE notification SET status = 'READ', read_at = NOW() WHERE id = #{id}")
     void markAsRead(@Param("id") Long id);
 
     /**
@@ -47,6 +44,5 @@ public interface NotificationMapper {
      * @param id 通知的ID，用于标识要逻辑删除的通知
      * 注释解释了为什么使用逻辑删除而非物理删除：可能是为了保留数据，以便未来查询或审计
      */
-    @Delete("UPDATE notification SET status = 'DELETED' WHERE id = #{id}")
     void deleteLogical(@Param("id") Long id);
 }

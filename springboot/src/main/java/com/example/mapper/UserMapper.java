@@ -1,9 +1,8 @@
 package com.example.mapper;
 
 import com.example.entity.User;
-import org.apache.ibatis.annotations.Delete;
 import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+
 import java.util.List;
 
 /**
@@ -37,7 +36,6 @@ public interface UserMapper {
      * @param username 用户名，查询用户的唯一标识
      * @return 用户对象，如果找到匹配的用户，否则返回null
      */
-    @Select("select * from `user` where username = #{username}")
     User selectByUsername(String username);
 
     /**
@@ -54,7 +52,6 @@ public interface UserMapper {
      *
      * @param id 用户ID，要删除用户的唯一标识
      */
-    @Delete("delete from `user` where id = #{id}")
     void deleteById(Integer id);
 
     /**
@@ -64,7 +61,5 @@ public interface UserMapper {
      * @param id 用户ID，查询用户的唯一标识
      * @return 用户对象，如果找到匹配的用户，否则返回null
      */
-    @Select("select * from `user` where id = #{id}")
     User selectById(String id);
 }
-

@@ -7,48 +7,67 @@
 
     <!-- 定义一个查询方法，id为selectAll，返回类型为com.example.entity.User -->
     <select id="selectAll" resultType="com.example.entity.User">
-        <!-- 查询user表中的所有列 -->
-        select * from `user`
-        <!-- 动态生成where条件 -->
+        <!-- 查询具有学生角色的用户信息 -->
+        SELECT u.*, GROUP_CONCAT(r.code) AS role
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
         <where>
-            <!-- 如果username不为空，则添加模糊查询条件 -->
-            <if test="username != null">username like concat('%', #{username}, '%')</if>
-            <!-- 如果name不为空，则添加模糊查询条件 -->
-            <if test="name != null">and name like concat('%', #{name}, '%')</if>  <!-- 相当于 name like '%1%' -->
+            <!-- 只查询学生角色的用户 -->
+            r.code = 'STUDENT'
+            <!-- 如果username不为空，则按username模糊查询 -->
+            <if test="username != null">and u.username like concat('%', #{username}, '%')</if>
+            <!-- 如果name不为空，则按name模糊查询 -->
+            <if test="name != null">and u.name like concat('%', #{name}, '%')</if>
         </where>
-        <!-- 按照id降序排列 -->
-        order by id desc
+        GROUP BY u.id
+        ORDER BY u.id DESC
     </select>
 
     <!-- 定义一个插入方法，id为insert -->
     <insert id="insert">
-        <!-- 向user表中插入数据 -->
-        insert into `user` (username, password, role, name, avatar)
+        <!-- 向users表中插入数据 -->
+        insert into `users` (username, password, name, avatar, email, phone, status, created_at)
         <!-- 使用占位符插入数据 -->
-        values(#{username} , #{password}, #{role}, #{name}, #{avatar})
+        values(#{username} , #{password}, #{name}, #{avatar}, #{email}, #{phone}, #{status}, NOW())
     </insert>
+
+    <!-- 根据用户名查询用户 -->
+    <select id="selectByUsername" resultType="com.example.entity.User">
+        SELECT u.*,
+        GROUP_CONCAT(r.code) AS role
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.username = #{username}
+        GROUP BY u.id
+    </select>
 
     <!-- 定义一个更新方法，id为updateById -->
     <update id="updateById">
-        <!-- 更新user表中的数据 -->
-        update `user` set username = #{username}, password = #{password}, role = #{role}, name = #{name}, avatar = #{avatar}
+        <!-- 更新users表中的数据 -->
+        update `users` set username = #{username}, password = #{password}, name = #{name},
+        avatar = #{avatar}, email = #{email}, phone = #{phone}, status = #{status}
         <!-- 根据id进行条件更新 -->
         where id = #{id}
     </update>
 
-    <!-- 根据用户名查询用户信息 -->
-    <select id="selectByUsername" resultType="com.example.entity.User">
-        select * from `user` where username = #{username}
-    </select>
-
-    <!-- 根据用户ID删除用户信息 -->
+    <!-- 根据ID删除用户 -->
     <delete id="deleteById">
-        delete from `user` where id = #{id}
+        delete from `users` where id = #{id}
     </delete>
 
-    <!-- 根据用户ID查询用户信息 -->
+    <!-- 根据ID查询用户 -->
     <select id="selectById" resultType="com.example.entity.User">
-        select * from `user` where id = #{id}
+        select * from `users` where id = #{id}
+    </select>
+
+    <!-- 根据用户ID查询用户角色 -->
+    <select id="selectRolesByUserId" resultType="java.lang.String">
+        SELECT r.code
+        FROM roles r
+        JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
     </select>
 
 </mapper>

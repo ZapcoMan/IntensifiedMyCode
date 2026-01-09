@@ -7,45 +7,71 @@
 
     <!-- 定义一个查询操作，ID为selectAll，返回类型为com.example.entity.Admin -->
     <select id="selectAll" resultType="com.example.entity.Admin">
-        <!-- 查询admin表中的所有列，并根据条件进行筛选 -->
-        select * from `admin`
+        <!-- 查询具有管理员角色的用户信息 -->
+        SELECT u.*, GROUP_CONCAT(r.code) AS role
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
         <where>
+            <!-- 只查询管理员角色的用户 -->
+            r.code IN ('SUPER_ADMIN', 'DEPT_ADMIN', 'CLUB_LEADER')
             <!-- 如果username不为空，则按username模糊查询 -->
-            <if test="username != null">username like concat('%', #{username}, '%')</if>
+            <if test="username != null">and u.username like concat('%', #{username}, '%')</if>
             <!-- 如果name不为空，则按name模糊查询 -->
-            <if test="name != null">and name like concat('%', #{name}, '%')</if>  <!-- 相当于 name like '%1%' -->
+            <if test="name != null">and u.name like concat('%', #{name}, '%')</if>
         </where>
-        <!-- 根据id降序排列结果 -->
-        order by id desc
+        GROUP BY u.id
+        ORDER BY u.id DESC
     </select>
 
     <!-- 定义一个插入操作，ID为insert -->
     <insert id="insert">
-        <!-- 向admin表中插入一条新记录 -->
-        insert into `admin` (username, password, role, name ,avatar)
-        values(#{username} , #{password}, #{role}, #{name}, #{avatar})
+        <!-- 向users表中插入一条新记录 -->
+        insert into `users` (username, password, name, avatar, email, phone, status, created_at)
+        values(#{username} , #{password}, #{name}, #{avatar}, #{email}, #{phone}, #{status}, NOW())
     </insert>
+
+    <!-- 根据用户名查询管理员 -->
+    <select id="selectByUsername" resultType="com.example.entity.Admin">
+        SELECT u.*,
+        GROUP_CONCAT(r.code) AS role
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.username = #{username}
+        GROUP BY u.id
+    </select>
+
 
     <!-- 定义一个更新操作，ID为updateById -->
     <update id="updateById">
-        <!-- 更新admin表中的一条记录，条件是id匹配 -->
-        update `admin` set username = #{username}, password = #{password}, role = #{role}, name = #{name}, avatar = #{avatar}
+        <!-- 更新users表中的一条记录，条件是id匹配 -->
+        update `users` set username = #{username}, password = #{password}, name = #{name},
+        avatar = #{avatar}, email = #{email}, phone = #{phone}, status = #{status}
         where id = #{id}
     </update>
 
-    <!-- 根据用户名查询管理员信息 -->
-    <select id="selectByUsername" resultType="com.example.entity.Admin">
-        select * from `admin` where username = #{username}
-    </select>
-
-    <!-- 根据ID删除管理员记录 -->
+    <!-- 根据ID删除管理员 -->
     <delete id="deleteById">
-        delete from `admin` where id = #{id}
+        delete from `users` where id = #{id}
     </delete>
 
-    <!-- 根据ID查询管理员信息 -->
+    <!-- 根据ID查询管理员 -->
     <select id="selectById" resultType="com.example.entity.Admin">
-        select * from `admin` where id = #{id}
+        SELECT u.*, GROUP_CONCAT(r.code) AS role
+        FROM users u
+        LEFT JOIN user_roles ur ON u.id = ur.user_id
+        LEFT JOIN roles r ON ur.role_id = r.id
+        WHERE u.id = #{id}
+        GROUP BY u.id
+    </select>
+
+    <!-- 根据用户ID查询用户角色 -->
+    <select id="selectRolesByUserId" resultType="java.lang.String">
+        SELECT r.code
+        FROM roles r
+        JOIN user_roles ur ON r.id = ur.role_id
+        WHERE ur.user_id = #{userId}
     </select>
 
 </mapper>

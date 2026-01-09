@@ -10,6 +10,9 @@ public class Admin extends Account {
     private String role;
     private String name;
 
+    private String email;
+    private String phone;
+
     private String token;
 
     @Override
@@ -61,6 +64,32 @@ public class Admin extends Account {
 
     public void setName(String name) {
         this.name = name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPhone() {
+        return phone;
+    }
+
+    public void setPhone(String phone) {
+        this.phone = phone;
+    }
+
+    private String status;
+
+    public String getStatus() {
+        return status;
+    }
+
+    public void setStatus(String status) {
+        this.status = status;
     }
 
     @Override

@@ -25,7 +25,7 @@ CREATE TABLE `admin`  (
   `id` int(11) NOT NULL AUTO_INCREMENT COMMENT 'id(主键)',
   `username` varchar(50) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '账号(唯一)',
   `password` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '密码',
-  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'ADMIN' COMMENT '身份',
+  `role` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL DEFAULT 'SUPER_ADMIN' COMMENT '身份',
   `name` varchar(20) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL COMMENT '真实姓名',
   `avatar` varchar(255) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NULL DEFAULT NULL COMMENT '头像',
   PRIMARY KEY (`id`) USING BTREE,
@@ -35,7 +35,7 @@ CREATE TABLE `admin`  (
 -- ----------------------------
 -- Records of admin
 -- ----------------------------
-INSERT INTO `admin` VALUES (1, 'admin1', 'e10adc3949ba59abbe56e057f20f883e', 'ADMIN', '管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg');
+INSERT INTO `admin` VALUES (1, 'admin1', 'e10adc3949ba59abbe56e057f20f883e', 'SUPER_ADMIN', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg');
 
 -- ----------------------------
 -- Table structure for audit_log
@@ -73,9 +73,9 @@ CREATE TABLE `menu`  (
 -- Records of menu
 -- ----------------------------
 INSERT INTO `menu` VALUES (1, '首页', '/manager/index', 0, 'House', 1, 'USER', 'Home.vue', 'ENABLE');
-INSERT INTO `menu` VALUES (2, '用户管理', '', 0, 'User', 2, 'ADMIN', '', 'ENABLE');
-INSERT INTO `menu` VALUES (3, '管理员信息', '/manager/admin', 2, '', 1, 'ADMIN', 'Admin.vue', 'ENABLE');
-INSERT INTO `menu` VALUES (4, '用户信息', '/manager/user', 2, '', 2, 'ADMIN', 'User.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (2, '用户管理', '', 0, 'User', 2, 'SUPER_ADMIN', '', 'ENABLE');
+INSERT INTO `menu` VALUES (3, '超级管理员信息', '/manager/admin', 2, '', 1, 'SUPER_ADMIN', 'Admin.vue', 'ENABLE');
+INSERT INTO `menu` VALUES (4, '用户信息', '/manager/user', 2, '', 2, 'SUPER_ADMIN', 'User.vue', 'ENABLE');
 
 -- ----------------------------
 -- Table structure for user

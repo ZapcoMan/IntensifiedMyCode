@@ -15,7 +15,7 @@ public class AdminStrategy implements RoleStrategy {
 
     @Override
     public String getRole() {
-        return RoleEnum.ADMIN.getCode(); // "ADMIN"
+        return RoleEnum.SUPER_ADMIN.getCode(); // "SUPER_ADMIN"
     }
 
     @Override

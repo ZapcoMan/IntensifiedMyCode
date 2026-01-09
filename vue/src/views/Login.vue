@@ -35,7 +35,7 @@
 
               <el-form-item prop="role">
                 <el-select size="large" style="width: 100%" v-model="data.form.role" placeholder="选择角色">
-                  <el-option label="管理员" value="ADMIN" />
+                  <el-option label="超级管理员" value="SUPER_ADMIN" />
                   <el-option label="学生" value="USER" />
                 </el-select>
               </el-form-item>
@@ -64,7 +64,7 @@ import { User, Lock, Key } from '@element-plus/icons-vue'
 const formRef = ref()
 
 const data = reactive({
-  form: { role: 'ADMIN' },
+  form: { role: 'SUPER_ADMIN' },
   rules: {
     username: [
       { required: true, message: '请输入账号', trigger: 'blur' },

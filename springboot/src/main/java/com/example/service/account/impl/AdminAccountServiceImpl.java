@@ -20,7 +20,7 @@ public class AdminAccountServiceImpl implements AccountService {
     private AdminService adminService;
     @Override
     public RoleEnum getRole() {
-        return RoleEnum.ADMIN;
+        return RoleEnum.SUPER_ADMIN;
     }
 
     @Override

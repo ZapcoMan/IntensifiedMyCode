@@ -70,7 +70,7 @@ public class TokenUtils {
         String[] split = audience.split("-");
         String userId = split[0];
         String role = split[1];
-        if ("ADMIN".equals(role)) {
+        if ("SUPER_ADMIN".equals(role)) {
             return staticAdminServiceImpl.selectById(userId);
         } else if ("USER".equals(role)) {
             return staticUserServiceImpl.selectById(userId);

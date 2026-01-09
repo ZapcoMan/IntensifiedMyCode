@@ -8,6 +8,10 @@
           <el-input size="large" v-model="data.form.username" autocomplete="off" prefix-icon="User"
                     placeholder="请输入账号"/>
         </el-form-item>
+        <el-form-item prop="name">
+          <el-input size="large" v-model="data.form.name" autocomplete="off" prefix-icon="UserFilled"
+                    placeholder="请输入真实姓名"/>
+        </el-form-item>
         <el-form-item prop="password">
           <el-input size="large" show-password v-model="data.form.password" autocomplete="off" prefix-icon="Lock"
                     placeholder="请输入密码"/>
@@ -15,6 +19,16 @@
         <el-form-item prop="confirmPassword">
           <el-input size="large" show-password v-model="data.form.confirmPassword" autocomplete="off" prefix-icon="Lock"
                     placeholder="请再次确认密码"/>
+        </el-form-item>
+        <el-form-item prop="avatar">
+          <el-upload
+              :action="fileUploadUrl"
+              :headers="{ token: data.user?.token }"
+              :on-success="handleFileSuccess"
+              list-type="picture"
+          >
+            <el-button type="primary">上传头像</el-button>
+          </el-upload>
         </el-form-item>
         <div style="margin-bottom: 20px">
           <el-button style="width: 100%; background-color: #248243; border-color: #248243" size="large" type="primary"
@@ -34,6 +48,7 @@ import {reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
 import router from "@/router/index.js";
 import {register} from "@/api/user.js";
+import {fileUploadUrl} from '@/utils/request'
 
 // 定义一个验证密码的函数
 const validatePass = (rule, value, callback) => {
@@ -55,6 +70,9 @@ const data = reactive({
       {required: true, message: '请输入账号', trigger: 'blur'},
       {min: 6, message: '账号最少6位', trigger: 'blur'},
     ],
+    name: [
+      {required: true, message: '请输入真实姓名', trigger: 'blur'},
+    ],
     password: [
       {required: true, message: '请输入密码', trigger: 'blur'}
     ],
@@ -64,6 +82,11 @@ const data = reactive({
     ]
   }
 })
+
+// 处理文件上传成功的回调
+const handleFileSuccess = (res) => {
+  data.form.avatar = res.data
+}
 
 // 定义一个执行注册的函数
 const registers = () => {

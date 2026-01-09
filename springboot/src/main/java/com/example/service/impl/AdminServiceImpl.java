@@ -39,7 +39,7 @@ public class AdminServiceImpl implements AdminService {
         if (StrUtil.isBlank(admin.getPassword())) {
             admin.setPassword("123456");
         }
-        admin.setRole("ADMIN");
+        admin.setRole("SUPER_ADMIN");
         adminMapper.insert(admin);
     }
 
@@ -136,7 +136,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         // 创建token并返回给前端
-        String token = TokenUtils.createToken(dbAdmin.getId() + "-" + "ADMIN", dbAdmin.getPassword());
+        String token = TokenUtils.createToken(dbAdmin.getId() + "-" + "SUPER_ADMIN", dbAdmin.getPassword());
         dbAdmin.setToken(token);
 
         // 返回登录成功的管理员对象

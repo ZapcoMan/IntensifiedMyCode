@@ -82,7 +82,7 @@ const emit = defineEmits(['updateUser'])
 
 const update = () => {
   let url
-  if (data.user.role === 'ADMIN') {
+  if (data.user.role === 'SUPER_ADMIN') {
     url = '/admin/update'
   }
   if (data.user.role === 'USER') {

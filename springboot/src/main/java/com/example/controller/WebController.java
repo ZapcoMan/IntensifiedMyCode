@@ -3,7 +3,8 @@ package com.example.controller;
 import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
 import com.example.entity.Account;
-import com.example.service.AdminService;
+import com.example.entity.User;
+import com.example.enums.RoleEnum;
 import com.example.service.UserService;
 import com.example.strategy.Context.RoleStrategyContext;
 import io.swagger.annotations.ApiOperation;
@@ -19,6 +20,9 @@ public class WebController {
 
     @Resource
     private RoleStrategyContext roleStrategyContext;
+
+    @Resource
+    private UserService userService;
 
     // 定义一个名为 hello 的接口，处理 GET 请求
     // 接口的路径，全局唯一的
@@ -45,20 +49,30 @@ public class WebController {
 
     /**
      * 用户注册接口，处理 POST 请求
-     * 目前使用固定的 UserServiceImpl 执行注册逻辑
-     * 未来可扩展为根据用户角色使用策略模式执行不同的注册逻辑
+     * 只允许注册普通用户，系统将强制设置角色为USER
      *
      * @param account 用户账户信息，用于注册新用户
      * @return 注册结果，包含成功或失败信息
-     * @throws UnsupportedOperationException 当注册策略分发功能未实现时抛出此异常
      */
     @ApiOperation("用户注册")
     @AuditLogRecord(action = "用户注册", resource = "用户")
     @PostMapping("/register")
     public R register(@RequestBody Account account) {
-        // 注册逻辑保持原有 UserServiceImpl
-        // 这里可以扩展成策略注册
-        throw new UnsupportedOperationException("暂未实现注册策略分发");
+        // 强制设置角色为USER，确保不能注册管理员账户
+        account.setRole(RoleEnum.USER.getCode());
+        
+        // 将Account转换为User对象进行注册
+        User user = new User();
+        user.setUsername(account.getUsername());
+        user.setPassword(account.getPassword());
+        user.setRole(account.getRole());
+        user.setName(account.getName());
+        user.setAvatar(account.getAvatar());
+        
+        // 使用UserService进行注册
+        userService.register(user);
+        
+        return R.success("注册成功");
     }
 
     /**

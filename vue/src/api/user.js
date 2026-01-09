@@ -26,6 +26,14 @@ export const deleteUsers = (rows) => {
     return request.delete('/user/deleteBatch', { data: rows })
 }
 
-export const register = (data) =>{
-    return request.post('/register', data.form)
+export const register = (formData) =>{
+    // 确保注册时只发送基本用户信息，角色由后端强制设定为USER
+    const userData = {
+        username: formData.username,
+        password: formData.password,
+        name: formData.name,
+        avatar: formData.avatar
+        // 不发送role字段，让后端强制设置为USER
+    }
+    return request.post('/register', userData)
 }

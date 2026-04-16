@@ -65,7 +65,7 @@ const userStore = useUserStore()
 const formRef = ref()
 
 const data = reactive({
-  form: { role: 'user' },
+  form: { role: 'USER' },
   rules: {
     username: [
       { required: true, message: '请输入账号', trigger: 'blur' },

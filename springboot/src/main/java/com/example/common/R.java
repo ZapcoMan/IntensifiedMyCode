@@ -39,6 +39,7 @@ public class R {
 
     public static R success(Object data) {
         R result = new R();
+        result.setSuccess(ResultCodeEnum.SUCCESS.getSuccess());
         result.setCode(ResultCodeEnum.SUCCESS.getCode());
         result.setData(data);
         result.setMessage("请求成功");
@@ -56,6 +57,7 @@ public class R {
 
     public static R error(Integer code, String msg) {
         R result = new R();
+        result.setSuccess(false);
         result.setCode(code);
         result.setMessage(msg);
         return result;
@@ -63,6 +65,7 @@ public class R {
 
     public static R error(String msg) {
         R result = new R();
+        result.setSuccess(false);
         result.setCode(ResultCodeEnum.UNKNOWN_ERROR.getCode());
         result.setMessage(msg);
         return result;
@@ -70,6 +73,7 @@ public class R {
 
     public static R error(ResultCodeEnum result,String msg) {
         R resp = new R();
+        resp.setSuccess(false);
         resp.setCode(result.getCode());
         resp.setMessage(msg);
         return resp;

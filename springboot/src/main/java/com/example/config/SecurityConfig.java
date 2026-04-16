@@ -36,7 +36,7 @@ public class SecurityConfig {
                 .authorizeHttpRequests()
                 .requestMatchers(
                         "/login", "/register",
-                        "/files/upload/**", "/files/download/**",
+                        "/files/download/**",
                         "/favicon.ico",
                         // Swagger UI 和 OpenAPI 文档
                         "/swagger-ui.html",

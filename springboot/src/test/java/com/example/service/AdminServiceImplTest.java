@@ -8,6 +8,7 @@ import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
 import com.example.service.impl.AdminServiceImpl;
 import com.example.utils.RedisUtils;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -37,6 +38,9 @@ class AdminServiceImplTest extends TestBase {
 
     @Mock
     private RedisUtils redisUtils;
+
+    @Mock
+    private TokenUtils tokenUtils;
 
     @InjectMocks
     private AdminServiceImpl adminService;
@@ -213,6 +217,7 @@ class AdminServiceImplTest extends TestBase {
 
         when(adminMapper.selectByUsername("admin")).thenReturn(testAdmin);
         when(redisUtils.set(anyString(), any(Admin.class), anyLong(), any(TimeUnit.class))).thenReturn(true);
+        when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 
         // When
         Admin result = adminService.login(loginAccount);
@@ -223,6 +228,7 @@ class AdminServiceImplTest extends TestBase {
         assertEquals("admin", result.getUsername());
         assertEquals("SUPER_ADMIN", result.getRole());
         verify(redisUtils, times(1)).set(anyString(), any(Admin.class), eq(30L), eq(TimeUnit.MINUTES));
+        verify(tokenUtils, times(1)).createToken(anyString(), anyString());
     }
 
     @Test
@@ -390,6 +396,7 @@ class AdminServiceImplTest extends TestBase {
 
         when(adminMapper.selectByUsername("admin")).thenReturn(mockAdmin);
         when(redisUtils.set(anyString(), any(Admin.class), anyLong(), any())).thenReturn(true);
+        when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 
         // When
         Admin result = adminService.login(loginAccount);
@@ -397,5 +404,6 @@ class AdminServiceImplTest extends TestBase {
         // Then
         assertNotNull(result);
         assertNotNull(result.getToken());
+        verify(tokenUtils, times(1)).createToken(anyString(), anyString());
     }
 }

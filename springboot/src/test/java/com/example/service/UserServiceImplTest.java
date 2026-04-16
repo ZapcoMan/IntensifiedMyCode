@@ -9,6 +9,7 @@ import com.example.mapper.UserMapper;
 import com.example.service.impl.UserServiceImpl;
 import com.example.utils.DistributedLockUtils;
 import com.example.utils.RedisUtils;
+import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -42,6 +43,9 @@ class UserServiceImplTest extends TestBase {
 
     @Mock
     private DistributedLockUtils distributedLockUtils;
+
+    @Mock
+    private TokenUtils tokenUtils;
 
     @InjectMocks
     private UserServiceImpl userService;
@@ -236,6 +240,7 @@ class UserServiceImplTest extends TestBase {
 
         when(userMapper.selectByUsername("testuser")).thenReturn(testUser);
         when(redisUtils.set(anyString(), any(User.class), anyLong(), any(TimeUnit.class))).thenReturn(true);
+        when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 
         // When
         User result = userService.login(loginAccount);
@@ -245,6 +250,7 @@ class UserServiceImplTest extends TestBase {
         assertNotNull(result.getToken());
         assertEquals("testuser", result.getUsername());
         verify(redisUtils, times(1)).set(anyString(), any(User.class), eq(30L), eq(TimeUnit.MINUTES));
+        verify(tokenUtils, times(1)).createToken(anyString(), anyString());
     }
 
     @Test

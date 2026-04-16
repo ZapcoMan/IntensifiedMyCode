@@ -42,7 +42,6 @@ public class AuditLogAspect {
      */
     @Around("@annotation(auditLogRecord)")
     public Object handleAudit(ProceedingJoinPoint joinPoint, AuditLogRecord auditLogRecord) throws Throwable {
-        Object result = null;
         // 获取当前登录用户名
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         // 获取客户端IP地址
@@ -50,25 +49,44 @@ public class AuditLogAspect {
                 ? ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest().getRemoteAddr()
                 : "unknown";
 
+        long startTime = System.currentTimeMillis();
+        
         try {
             // 执行被拦截的方法
-            result = joinPoint.proceed();
-            return result;
-        } finally {
-            /*
-             * 创建并保存审计日志记录
-             * 记录用户名、操作类型、资源类型、IP地址和操作详情
-             */
-            // 创建审计日志对象
-            AuditLog log = AuditLog.builder()
+            Object result = joinPoint.proceed();
+            
+            // 记录成功的审计日志
+            long duration = System.currentTimeMillis() - startTime;
+            AuditLog successLog = AuditLog.builder()
                     .username(username)
                     .action(auditLogRecord.action())
                     .resource(auditLogRecord.resource())
                     .ipAddress(ip)
                     .details(Arrays.toString(joinPoint.getArgs()))
                     .build();
-            // 保存审计日志
-            auditLogService.saveLog(log);
+            auditLogService.saveLog(successLog);
+            
+            log.info(String.format("审计日志 - 用户: %s, 操作: %s, 资源: %s, IP: %s, 耗时: %dms, 状态: 成功",
+                    username, auditLogRecord.action(), auditLogRecord.resource(), ip, duration));
+            
+            return result;
+        } catch (Throwable e) {
+            // 记录失败的审计日志
+            long duration = System.currentTimeMillis() - startTime;
+            AuditLog errorLog = AuditLog.builder()
+                    .username(username)
+                    .action(auditLogRecord.action())
+                    .resource(auditLogRecord.resource())
+                    .ipAddress(ip)
+                    .details(Arrays.toString(joinPoint.getArgs()) + " | 异常: " + e.getMessage())
+                    .build();
+            auditLogService.saveLog(errorLog);
+            
+            log.error(String.format("审计日志 - 用户: %s, 操作: %s, 资源: %s, IP: %s, 耗时: %dms, 状态: 失败, 异常: %s",
+                    username, auditLogRecord.action(), auditLogRecord.resource(), ip, duration, e.getMessage()), e);
+            
+            // 继续抛出异常，让上层处理
+            throw e;
         }
     }
 

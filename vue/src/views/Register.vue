@@ -20,15 +20,6 @@
           <el-input size="large" show-password v-model="data.form.confirmPassword" autocomplete="off" prefix-icon="Lock"
                     placeholder="请再次确认密码"/>
         </el-form-item>
-        <el-form-item prop="avatar">
-          <el-upload
-              :action="fileUploadUrl"
-              :on-success="handleFileSuccess"
-              list-type="picture"
-          >
-            <el-button type="primary">上传头像</el-button>
-          </el-upload>
-        </el-form-item>
         <div style="margin-bottom: 20px">
           <el-button style="width: 100%; background-color: #248243; border-color: #248243" size="large" type="primary"
                      @click="registers">注 册
@@ -47,7 +38,6 @@ import {reactive, ref} from "vue";
 import {ElMessage} from "element-plus";
 import router from "@/router/index.js";
 import {register} from "@/api/user.js";
-import {fileUploadUrl} from '@/utils/request'
 
 // 定义一个验证密码的函数
 const validatePass = (rule, value, callback) => {
@@ -81,11 +71,6 @@ const data = reactive({
     ]
   }
 })
-
-// 处理文件上传成功的回调
-const handleFileSuccess = (res) => {
-  data.form.avatar = res.data
-}
 
 // 定义一个执行注册的函数
 const registers = () => {

@@ -2,6 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.example.mapper.MenuMapper">
 
+    <!-- 简化的 ResultMap，不包含嵌套查询 -->
     <resultMap id="MenuMap" type="com.example.entity.Menu">
         <id property="id" column="id"/>
         <result property="name" column="name"/>
@@ -12,7 +13,7 @@
         <result property="role" column="role"/>
         <result property="component" column="component"/>
         <result property="status" column="status"/>
-        <collection property="children" ofType="com.example.entity.Menu" select="selectChildren" column="id"/>
+        <!-- 移除 collection 嵌套查询，由 Java 代码构建树 -->
     </resultMap>
 
     <select id="findByRole" parameterType="String" resultMap="MenuMap">
@@ -34,12 +35,7 @@
         WHERE id = #{id}
     </select>
 
-    <select id="selectChildren" parameterType="Integer" resultMap="MenuMap">
-        SELECT id, name, path, parent_id, icon, order_num, role, component, status
-        FROM menu
-        WHERE parent_id = #{id} AND status = 'ENABLE'
-        ORDER BY order_num ASC
-    </select>
+    <!-- 删除 selectChildren 嵌套查询，避免 N+1 问题 -->
 
     <insert id="insert" parameterType="com.example.entity.Menu">
         INSERT INTO menu (name, path, parent_id, icon, order_num, role, component, status)

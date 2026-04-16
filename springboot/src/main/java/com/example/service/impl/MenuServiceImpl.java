@@ -109,14 +109,22 @@ public class MenuServiceImpl implements MenuService {
     }
 
     /**
-     * 清除菜单相关的缓存
+     * 清除菜单相关的缓存（包括所有角色缓存）
      */
     private void clearMenuCache() {
-        // 获取所有可能的缓存键并清除
+        // 1. 清除所有菜单缓存
         redisUtils.remove("menu:all");
         
-        // 这里可以清除所有角色相关的菜单缓存，或使用通配符（如果Redis支持）
-        // 为了简单起见，可以清除所有菜单缓存
+        // 2. 清除所有角色相关的菜单缓存
+        // 由于 Redis 不支持直接通配符删除，需要遍历可能的角色
+        // 这里使用 RoleEnum 中定义的所有角色
+        String[] roles = {"SUPER_ADMIN", "DEPT_ADMIN", "CLUB_LEADER", "USER"};
+        for (String role : roles) {
+            redisUtils.remove("menu:role:" + role);
+        }
+        
+        // 3. 注意：如果未来新增角色，需要同步更新此列表
+        // 更好的方案是维护一个 Set 记录所有已缓存的角色键
     }
 
     /**

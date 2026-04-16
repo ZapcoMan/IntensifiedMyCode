@@ -4,7 +4,7 @@ package com.example.controller;
 import com.example.annotation.AuditLogRecord;
 import com.example.entity.AuditLog;
 import com.example.service.AuditLogService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -39,7 +39,7 @@ public class AuditLogController {
      * @param limit 限制获取的日志数量，默认为20条
      * @return 返回最近的审计日志列表
      */
-    @ApiOperation("获取最近的审计日志")
+    @Operation(summary = "获取最近的审计日志")
     @AuditLogRecord(action = "获取最近的审计日志" ,resource = "审计日志")
     @GetMapping("/recent")
     public List<AuditLog> getRecentLogs(@RequestParam(defaultValue = "20") int limit) {

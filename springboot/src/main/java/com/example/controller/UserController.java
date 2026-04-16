@@ -7,7 +7,7 @@ import com.example.common.ResultCodeEnum;
 import com.example.entity.User;
 import com.example.service.impl.UserServiceImpl;
 import com.example.utils.TokenUtils;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -32,7 +32,7 @@ public class UserController {
      * @param user 待添加的用户对象，通过请求体接收
      * @return 返回添加操作的结果
      */
-    @ApiOperation("添加新用户")
+    @Operation(summary = "添加新用户")
     @AuditLogRecord(action = "添加新用户", resource = "用户")
     @PostMapping("/add")
     public R add(@RequestBody User user) {
@@ -47,7 +47,7 @@ public class UserController {
      * @return 返回更新操作的结果
      */
     @AuditLogRecord(action = "更新用户信息", resource = "用户")
-    @ApiOperation("更新用户信息")
+    @Operation(summary = "更新用户信息")
     @PutMapping("/update")
     public R update(@RequestBody User user) {
         userServiceImpl.update(user);
@@ -62,7 +62,7 @@ public class UserController {
      */
 
     @AuditLogRecord(action = "删除用户", resource = "用户")
-    @ApiOperation("根据用户ID删除用户")
+    @Operation(summary = "根据用户ID删除用户")
     @DeleteMapping("/delete/{id}")
     public R delete(@PathVariable Integer id) {
         userServiceImpl.deleteById(id);
@@ -76,7 +76,7 @@ public class UserController {
      * @return 返回批量删除操作的结果
      */
     @AuditLogRecord(action = "批量删除用户", resource = "用户")
-    @ApiOperation("批量删除用户")
+    @Operation(summary = "批量删除用户")
     @DeleteMapping("/deleteBatch")
     public R deleteBatch(@RequestBody List<User> list) {
         userServiceImpl.deleteBatch(list);
@@ -89,7 +89,7 @@ public class UserController {
      * @return 返回token验证结果
      */
     @AuditLogRecord(action = "验证Token", resource = "Token")
-    @ApiOperation("验证Token")
+    @Operation(summary = "验证Token")
     @GetMapping("/validateToken")
     public R validateToken() {
         if (TokenUtils.validateToken()) {
@@ -105,7 +105,7 @@ public class UserController {
      * @return 返回所有用户信息列表
      */
     @AuditLogRecord(action = "查询所有用户", resource = "用户")
-    @ApiOperation("查询所有用户")
+    @Operation(summary = "查询所有用户")
     @GetMapping("/selectAll")
     public R selectAll() {
         List<User> userList = userServiceImpl.selectAll();
@@ -121,7 +121,7 @@ public class UserController {
      * @return 返回分页查询结果，包含用户信息
      */
     @AuditLogRecord(action = "分页查询用户信息", resource = "用户")
-    @ApiOperation("分页查询用户信息")
+    @Operation(summary = "分页查询用户信息")
     @GetMapping("/selectPage")
     public R selectPage(@RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize,

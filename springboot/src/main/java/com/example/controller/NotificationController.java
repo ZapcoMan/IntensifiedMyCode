@@ -6,7 +6,7 @@ import com.example.common.R;
 
 import com.example.entity.Notification;
 import com.example.service.NotificationService;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
@@ -20,7 +20,7 @@ public class NotificationController {
     @Resource
     private NotificationService notificationService;
 
-    @ApiOperation("发送通知")
+    @Operation(summary = "发送通知")
     @AuditLogRecord(action = "发送通知", resource = "通知")
     @PostMapping("/send")
     public R  sendNotification(@RequestBody Notification notification) {
@@ -29,7 +29,7 @@ public class NotificationController {
         return R.success("sent");
     }
 
-    @ApiOperation("获取用户通知")
+    @Operation(summary = "获取用户通知")
     @AuditLogRecord(action = "获取用户通知", resource = "通知")
     @GetMapping("/user/{userId}")
     public R getUserNotifications(@PathVariable Long userId) {
@@ -37,7 +37,7 @@ public class NotificationController {
         return R.success(notificationService.getUserNotifications(userId));
     }
 
-    @ApiOperation("标记通知为已读")
+    @Operation(summary = "标记通知为已读")
     @AuditLogRecord(action = "标记通知为已读", resource = "通知")
     @PostMapping("/{id}/read")
     public R markAsRead(@PathVariable Long id) {
@@ -45,7 +45,7 @@ public class NotificationController {
         return R.success("marked as read");
     }
 
-    @ApiOperation("删除通知")
+    @Operation(summary = "删除通知")
     @AuditLogRecord(action = "删除通知", resource = "通知")
     @DeleteMapping("/{id}")
     public R delete(@PathVariable Long id) {

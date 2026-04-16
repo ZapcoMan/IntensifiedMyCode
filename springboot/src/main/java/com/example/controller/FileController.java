@@ -7,7 +7,7 @@ import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
 import com.example.config.FileUploadConfig;
 import com.example.exception.CustomerException;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.logging.Log;
@@ -33,7 +33,7 @@ public class FileController {
     /**
      * 文件上传
      */
-    @ApiOperation("文件上传")
+    @Operation(summary = "文件上传")
     @AuditLogRecord(action = "文件上传", resource = "文件")
     @PostMapping("/upload")
     public R upload(@RequestParam("file") MultipartFile file) throws Exception {
@@ -60,7 +60,7 @@ public class FileController {
      * 文件下载
      * 下载路径："http://localhost:9999/files/download/404.jpg"
      */
-    @ApiOperation("文件下载")
+    @Operation(summary = "文件下载")
     @AuditLogRecord(action = "文件下载", resource = "文件")
     @GetMapping("/download/{fileName}")
     public R download(@PathVariable String fileName, HttpServletResponse response) throws Exception {
@@ -89,7 +89,7 @@ public class FileController {
     /**
      * wang-editor编辑器文件上传接口
      */
-    @ApiOperation("wang-editor编辑器文件上传接口")
+    @Operation(summary = "wang-editor编辑器文件上传接口")
     @AuditLogRecord(action = "wang-editor编辑器文件上传接口", resource = "文件上传")
     @PostMapping("/wang/upload")
     public R wangEditorUpload(MultipartFile file) {

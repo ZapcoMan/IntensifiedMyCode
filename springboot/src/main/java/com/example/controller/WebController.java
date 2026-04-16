@@ -7,7 +7,7 @@ import com.example.entity.User;
 import com.example.enums.RoleEnum;
 import com.example.service.UserService;
 import com.example.strategy.Context.RoleStrategyContext;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -39,7 +39,7 @@ public class WebController {
      * @param account 用户账户信息，包含角色和登录所需的信息
      * @return 登录结果，包含成功或失败信息
      */
-    @ApiOperation("登录")
+    @Operation(summary = "登录")
     @AuditLogRecord(action = "登录", resource = "用户")
     @PostMapping("/login")
     public R login(@RequestBody Account account) {
@@ -54,7 +54,7 @@ public class WebController {
      * @param account 用户账户信息，用于注册新用户
      * @return 注册结果，包含成功或失败信息
      */
-    @ApiOperation("用户注册")
+    @Operation(summary = "用户注册")
     @AuditLogRecord(action = "用户注册", resource = "用户")
     @PostMapping("/register")
     public R register(@RequestBody Account account) {
@@ -82,7 +82,7 @@ public class WebController {
      * @param account 用户账户信息，包含新密码和角色信息
      * @return 更新密码操作结果，包含成功或失败信息
      */
-    @ApiOperation("更新密码")
+    @Operation(summary = "更新密码")
     @AuditLogRecord(action = "更新密码", resource = "用户")
     @PostMapping("/updatePassword")
     public R updatePassword(@RequestBody Account account) {

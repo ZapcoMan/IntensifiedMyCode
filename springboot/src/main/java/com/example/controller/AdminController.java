@@ -6,7 +6,7 @@ import com.example.common.ResultCodeEnum;
 import com.example.entity.Admin;
 import com.example.service.impl.AdminServiceImpl;
 import com.example.utils.TokenUtils;
-import io.swagger.annotations.ApiOperation;
+import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
@@ -36,7 +36,7 @@ public class AdminController {
      * @param admin 包含管理员用户信息的对象，包括用户名、密码等
      * @return 返回一个R对象，表示操作结果状态
      */
-    @ApiOperation("添加管理员")
+    @Operation(summary = "添加管理员")
     @AuditLogRecord(action = "添加管理员", resource = "管理员")
     @PostMapping("/add")
     public R add(@RequestBody Admin admin) {
@@ -51,7 +51,7 @@ public class AdminController {
      * @param admin 前端传入的管理员对象，通过JSON格式传递
      * @return 返回结果对象，表示更新操作是否成功
      */
-    @ApiOperation("更新管理员信息")
+    @Operation(summary = "更新管理员信息")
     @AuditLogRecord(action = "更新管理员信息", resource = "管理员")
     @PutMapping("/update")
     public R update(@RequestBody Admin admin) {
@@ -64,7 +64,7 @@ public class AdminController {
      * @param id 要删除的管理员的ID，通过URL路径参数传递
      * @return 返回结果对象，表示删除操作是否成功
      */
-    @ApiOperation("根据ID删除管理员")
+    @Operation(summary = "根据ID删除管理员")
     @AuditLogRecord(action = "删除管理员", resource = "管理员")
     @DeleteMapping("/delete/{id}")
     public R delete(@PathVariable Integer id) {
@@ -77,7 +77,7 @@ public class AdminController {
      * @param list 前端传入的管理员对象列表，通过JSON数组格式传递
      * @return 返回结果对象，表示批量删除操作是否成功
      */
-    @ApiOperation("批量删除管理员")
+    @Operation(summary = "批量删除管理员")
     @DeleteMapping("/deleteBatch")
     @AuditLogRecord(action = "批量删除管理员", resource = "管理员")
     public R deleteBatch(@RequestBody List<Admin> list) {
@@ -91,7 +91,7 @@ public class AdminController {
      * @return 返回token验证结果
      */
     @AuditLogRecord(action = "验证Token", resource = "Token")
-    @ApiOperation("验证Token")
+    @Operation(summary = "验证Token")
     @GetMapping("/validateToken")
     public R validateToken() {
         if (TokenUtils.validateToken()) {
@@ -105,7 +105,7 @@ public class AdminController {
      * 查询所有管理员
      * @return 返回结果对象，包含所有管理员信息的列表
      */
-    @ApiOperation("查询所有管理员")
+    @Operation(summary = "查询所有管理员")
     @AuditLogRecord(action = "查询所有管理员", resource = "管理员")
     @GetMapping("/selectAll")
     public R selectAll() {
@@ -119,7 +119,7 @@ public class AdminController {
      * @param admin 管理员对象，可以包含查询条件
      * @return 返回结果对象，包含分页查询结果的PageInfo对象
      */
-    @ApiOperation("分页查询管理员")
+    @Operation(summary = "分页查询管理员")
     @AuditLogRecord(action = "分页查询管理员", resource = "管理员")
     @GetMapping("/selectPage")
     public R selectPage(@RequestParam(defaultValue = "1") Integer pageNum,

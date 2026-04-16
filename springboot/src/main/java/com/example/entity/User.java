@@ -47,6 +47,12 @@ public class User extends Account {
     // 用户头像URL
     private String avatar;
 
+    // 邮箱
+    private String email;
+
+    // 电话
+    private String phone;
+
     /**
      * 获取用户头像URL
      *

@@ -1,30 +1,28 @@
+# ==========================================================
 # 开发环境配置
+# ==========================================================
 spring:
-  # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3307/intensifiedmycode?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
     username: root
     password: admin
-    url: jdbc:mysql://localhost:3307/intensifiedmycode?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
-  # Redis配置
   data:
     redis:
       host: localhost
       port: 6379
-      password: 
+      password:
       database: 0
+  flyway:
+    # 开发环境允许 Flyway clean（清空表后重建）
+    clean-disabled: false
 
-# 服务器配置
-server:
-  port: 9991
+# MyBatis SQL 日志（开发环境打印 SQL）
+mybatis:
+  configuration:
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
-# 日志级别配置
 logging:
   level:
-    com.example: debug  # 开发环境设置为debug级别，便于调试
-    org.springframework: info
-    root: info
-
-# 开发环境特定配置
-profiles:
-  active: dev
+    com.example: DEBUG
+    org.springframework.security: DEBUG

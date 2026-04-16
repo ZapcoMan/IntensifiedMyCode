@@ -1,30 +1,22 @@
+# ==========================================================
 # 测试环境配置
+# ==========================================================
 spring:
-  # 数据库配置
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    username: test_user
-    password: test_password
-    url: jdbc:mysql://test-server:3306/intensifiedmycode_test?useUnicode=true&characterEncoding=utf-8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
-  # Redis配置
+    url: jdbc:mysql://localhost:3306/intensifiedmycode_test?useUnicode=true&characterEncoding=utf8&allowMultiQueries=true&useSSL=false&serverTimezone=GMT%2b8&allowPublicKeyRetrieval=true
+    username: root
+    password: root
   data:
     redis:
-      host: test-redis-server
+      host: localhost
       port: 6379
-      password: test_redis_password
+      password:
       database: 1
+  flyway:
+    # 测试环境允许 clean
+    clean-disabled: false
 
-# 服务器配置
-server:
-  port: 9992
-
-# 日志级别配置
 logging:
   level:
-    com.example: info  # 测试环境设置为info级别
-    org.springframework: warn
-    root: warn
-
-# 测试环境特定配置
-profiles:
-  active: test
+    com.example: INFO

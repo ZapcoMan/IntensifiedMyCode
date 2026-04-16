@@ -1,24 +1,59 @@
-# 默认激活的环境
+# ==========================================================
+# Spring Boot 统一配置入口
+# ==========================================================
 spring:
+  # 激活哪个环境，dev / test / prod
   profiles:
-    active: @spring.profiles.active@  # 使用Maven Profile变量
+    active: @spring.profiles.active@
+  # 文件上传临时目录
+  servlet:
+    multipart:
+      max-file-size: 10MB
+      max-request-size: 10MB
 
-# 通用配置
 server:
   port: 9991
 
-# 配置mybatis实体和xml映射
+# ==========================================================
+# MyBatis 配置
+# ==========================================================
 mybatis:
-  ## 映射xml
   mapper-locations: classpath:mapper/*.xml
   configuration:
-    # 配置日志
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
     map-underscore-to-camel-case: true
 
-# 文件上传配置
+# ==========================================================
+# Flyway 数据库版本管理
+# ==========================================================
+spring.flyway:
+  enabled: true
+  # 修复启动慢：baseline-on-migrate 让已有数据库直接建基线，不用手动 baseline
+  baseline-on-migrate: true
+  # 迁移脚本位置（classpath 相对于 resources/db/migration）
+  locations: classpath:db/migration
+  # 编码
+  encoding: UTF-8
+  # 生产环境建议设为 false，禁止自动清理
+  clean-disabled: true
+
+# ==========================================================
+# Actuator 监控端点
+# ==========================================================
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
+
+# 文件上传
 file:
   upload:
     base-url: http://127.0.0.1:9991
     path: ${user.dir}/files/
-#    path: ./files/

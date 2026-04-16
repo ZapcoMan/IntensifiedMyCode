@@ -12,6 +12,8 @@ import com.github.pagehelper.PageInfo;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
@@ -336,5 +338,63 @@ class AdminServiceImplTest extends TestBase {
     @DisplayName("更新密码 - 原密码错误（跳过-需要重构）")
     void testUpdatePassword_WrongOldPassword_Skipped() {
         // 此测试需要重构TokenUtils以支持mock
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"admin1", "super_admin", "manager", "Admin123"})
+    @DisplayName("添加管理员 - 参数化测试不同用户名")
+    void testAdd_WithDifferentUsernames(String username) {
+        // Given
+        Admin newAdmin = new Admin();
+        newAdmin.setUsername(username);
+        newAdmin.setName("测试管理员");
+        newAdmin.setPassword("123456");
+
+        when(adminMapper.selectByUsername(username)).thenReturn(null);
+
+        // When
+        adminService.add(newAdmin);
+
+        // Then
+        verify(adminMapper, times(1)).insert(any(Admin.class));
+        assertEquals("SUPER_ADMIN", newAdmin.getRole());
+    }
+
+    @ParameterizedTest
+    @ValueSource(ints = {1, 2, 5, 50, 100})
+    @DisplayName("删除管理员 - 参数化测试不同ID")
+    void testDeleteById_WithDifferentIds(Integer adminId) {
+        // When
+        adminService.deleteById(adminId);
+
+        // Then
+        verify(adminMapper, times(1)).deleteById(adminId);
+        verify(redisUtils, times(1)).remove("user:info:" + adminId + ":SUPER_ADMIN");
+    }
+
+    @ParameterizedTest
+    @ValueSource(strings = {"password1", "123456", "admin@2024", "StrongP@ss123"})
+    @DisplayName("管理员登录 - 参数化测试不同密码格式")
+    void testLogin_WithDifferentPasswords(String password) {
+        // Given
+        Account loginAccount = new Account();
+        loginAccount.setUsername("admin");
+        loginAccount.setPassword(password);
+
+        Admin mockAdmin = new Admin();
+        mockAdmin.setId(1);
+        mockAdmin.setUsername("admin");
+        mockAdmin.setPassword(cn.hutool.crypto.digest.DigestUtil.md5Hex(password));
+        mockAdmin.setRole("SUPER_ADMIN");
+
+        when(adminMapper.selectByUsername("admin")).thenReturn(mockAdmin);
+        when(redisUtils.set(anyString(), any(Admin.class), anyLong(), any())).thenReturn(true);
+
+        // When
+        Admin result = adminService.login(loginAccount);
+
+        // Then
+        assertNotNull(result);
+        assertNotNull(result.getToken());
     }
 }

@@ -34,6 +34,10 @@ public class UserServiceImpl implements UserService {
      * @throws CustomerException 如果用户名已存在，则抛出异常
      */
     public void add(User user) {
+        // 新增：参数校验
+        if (StrUtil.isBlank(user.getUsername())) {
+            throw new CustomerException("用户名不能为空");
+        }
         // 根据新的账号查询数据库  是否存在同样账号的数据
         User dbUser = userMapper.selectByUsername(user.getUsername());
         if (dbUser != null) {

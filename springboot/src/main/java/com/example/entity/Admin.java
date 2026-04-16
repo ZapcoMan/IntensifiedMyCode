@@ -9,16 +9,9 @@ import lombok.EqualsAndHashCode;
 @Data
 @EqualsAndHashCode(callSuper = true)
 public class Admin extends Account {
-    private Integer id;
-    private String username;
-    private String password;
-    private String role;
-    private String name;
-
+    // 邮箱
     private String email;
+    
+    // 电话
     private String phone;
-
-    private String token;
-
-
 }

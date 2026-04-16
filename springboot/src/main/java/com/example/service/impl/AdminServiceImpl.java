@@ -1,6 +1,7 @@
 package com.example.service.impl;
 
 import cn.hutool.core.util.StrUtil;
+import cn.hutool.crypto.digest.DigestUtil;
 import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
@@ -40,9 +41,12 @@ public class AdminServiceImpl implements AdminService {
         if (dbAdmin != null) {
             throw new CustomerException("账号重复");
         }
-        // 默认密码
+        // 默认密码（MD5Hex 加密后存储，与 User 保持一致）
         if (StrUtil.isBlank(admin.getPassword())) {
-            admin.setPassword("123456");
+            admin.setPassword(DigestUtil.md5Hex("123456"));
+        } else {
+            // 明文传入的密码也统一加密存储
+            admin.setPassword(DigestUtil.md5Hex(admin.getPassword()));
         }
         admin.setRole("SUPER_ADMIN");
         adminMapper.insert(admin);

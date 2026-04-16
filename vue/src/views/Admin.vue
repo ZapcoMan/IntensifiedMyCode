@@ -213,7 +213,7 @@ const deleteBatch = () => {
   }
   ElMessageBox.confirm('删除后无法恢复，您确认删除吗？', '删除确认', { type: 'warning' })
       .then(() => {
-        request.delete('/admin/deleteBatch', { data: data.rows.map(v => v.id) }).then(res => {
+        request.delete('/admin/deleteBatch', { data: data.rows }).then(res => {
           if (res.code === 20000) {
             ElMessage.success('批量删除成功')
             load()

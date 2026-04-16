@@ -103,13 +103,12 @@ class UserControllerTest extends TestBase {
     @DisplayName("批量删除用户 - 成功")
     void testDeleteBatch_Success() throws Exception {
         // Given
-        List<User> userList = Arrays.asList(testUser);
         doNothing().when(userServiceImpl).deleteBatch(anyList());
 
         // When & Then
         mockMvc.perform(delete("/user/deleteBatch")
                 .contentType(MediaType.APPLICATION_JSON)
-                .content("[{\"id\":1},{\"id\":2}]"))
+                .content("[1,2]"))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.code").value(20000));
 

@@ -102,7 +102,7 @@
 
 <script setup>
 import router from "@/router/index.js";
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import { useUserStore } from '@/stores/user'
 import { useThemeStore } from '@/stores/theme'
 import { useMenuStore } from '@/stores/menu'
@@ -122,12 +122,12 @@ const iconMap = {
   'document': Document
 }
 
-// 从 store 获取数据
+// ✅ 使用 computed 确保响应式
 const data = {
-  user: userStore.user,
-  menus: menuStore.menus,
-  openedMenus: menuStore.openedMenus,
-  darkMode: themeStore.darkMode
+  user: computed(() => userStore.user),
+  menus: computed(() => menuStore.menus),
+  openedMenus: computed(() => menuStore.openedMenus),
+  darkMode: computed(() => themeStore.darkMode)
 }
 
 const logout = () => {

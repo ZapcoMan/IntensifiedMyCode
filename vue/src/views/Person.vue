@@ -82,11 +82,16 @@ const emit = defineEmits(['updateUser'])
 
 const update = () => {
   let url
-  if (data.user.role === 'SUPER_ADMIN') {
+  const role = data.user.role
+  
+  // ✅ 支持所有管理员角色
+  if (role === 'SUPER_ADMIN' || role === 'DEPT_ADMIN' || role === 'CLUB_LEADER') {
     url = '/admin/update'
-  }
-  if (data.user.role === 'USER') {
+  } else if (role === 'USER') {
     url = '/user/update'
+  } else {
+    ElMessage.error('未知角色类型')
+    return
   }
 
   request.put(url, data.user).then(res => {

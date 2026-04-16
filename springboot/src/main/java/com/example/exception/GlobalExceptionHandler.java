@@ -40,8 +40,8 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(CustomerException.class)
     @ResponseBody // 将result对象转换成 json的格式
     public R customerError(CustomerException e) {
-        // 记录自定义异常日志
-        log.error("出现了未知的错误", e);
+        // ✅ 记录自定义异常日志（已知业务异常，使用 warn 级别）
+        log.warn("业务异常: code={}, msg={}", e.getCode(), e.getMsg());
         // 返回自定义异常错误信息
         return R.error(Integer.valueOf(e.getCode()), e.getMsg());
     }

@@ -6,7 +6,7 @@ import com.example.common.R;
 import com.example.common.ResultCodeEnum;
 import com.example.entity.Account;
 import com.example.entity.User;
-import com.example.service.impl.UserServiceImpl;
+import com.example.service.UserService;
 import com.example.utils.TokenUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
@@ -25,7 +25,7 @@ public class UserController {
      * 注入用户服务层接口，用于执行用户相关的业务逻辑
      */
     @Resource
-    UserServiceImpl userServiceImpl;
+    UserService userService;
 
     @Resource
     TokenUtils tokenUtils;
@@ -40,7 +40,7 @@ public class UserController {
     @AuditLogRecord(action = "添加新用户", resource = "用户")
     @PostMapping("/add")
     public R add(@RequestBody User user) {
-        userServiceImpl.add(user);
+        userService.add(user);
         return R.ok();
     }
 
@@ -54,7 +54,7 @@ public class UserController {
     @Operation(summary = "更新用户信息")
     @PutMapping("/update")
     public R update(@RequestBody User user) {
-        userServiceImpl.update(user);
+        userService.update(user);
         return  R.ok();
     }
 
@@ -69,7 +69,7 @@ public class UserController {
     @Operation(summary = "根据用户ID删除用户")
     @DeleteMapping("/delete/{id}")
     public R delete(@PathVariable Integer id) {
-        userServiceImpl.deleteById(id);
+        userService.deleteById(id);
         return  R.ok();
     }
 
@@ -83,7 +83,7 @@ public class UserController {
     @Operation(summary = "批量删除用户")
     @DeleteMapping("/deleteBatch")
     public R deleteBatch(@RequestBody List<User> list) {
-        userServiceImpl.deleteBatch(list);
+        userService.deleteBatch(list);
         return  R.ok();
     }
 
@@ -113,7 +113,7 @@ public class UserController {
     @Operation(summary = "查询所有用户")
     @GetMapping("/selectAll")
     public R selectAll() {
-        List<User> userList = userServiceImpl.selectAll();
+        List<User> userList = userService.selectAll();
         return  R.ok().data("userList", userList);
     }
 
@@ -131,7 +131,7 @@ public class UserController {
     public R selectPage(@RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize,
                              User user) {
-        return  R.ok().data("pageInfo", userServiceImpl.selectPage(pageNum, pageSize, user));  // 返回的是分页的对象
+        return  R.ok().data("pageInfo", userService.selectPage(pageNum, pageSize, user));  // 返回的是分页的对象
     }
 
 }

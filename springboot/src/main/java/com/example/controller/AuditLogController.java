@@ -2,6 +2,7 @@ package com.example.controller;
 
 
 import com.example.annotation.AuditLogRecord;
+import com.example.common.R;
 import com.example.entity.AuditLog;
 import com.example.service.AuditLogService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -42,8 +43,9 @@ public class AuditLogController {
     @Operation(summary = "获取最近的审计日志")
     @AuditLogRecord(action = "获取最近的审计日志" ,resource = "审计日志")
     @GetMapping("/recent")
-    public List<AuditLog> getRecentLogs(@RequestParam(defaultValue = "20") int limit) {
+    public R getRecentLogs(@RequestParam(defaultValue = "20") int limit) {
         log.info("Getting recent logs with limit: " + limit);
-        return auditLogService.getRecentLogs(limit);
+        List<AuditLog> logs = auditLogService.getRecentLogs(limit);
+        return R.success(logs);
     }
 }

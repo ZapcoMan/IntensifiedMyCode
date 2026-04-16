@@ -2,7 +2,7 @@ package com.example.strategy.impl;
 
 import com.example.entity.Account;
 import com.example.enums.RoleEnum;
-import com.example.service.impl.UserServiceImpl;
+import com.example.service.UserService;
 import com.example.strategy.RoleStrategy;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 public class UserStrategy implements RoleStrategy {
 
     @Autowired
-    private UserServiceImpl userService;
+    private UserService userService;
 
     @Override
     public String getRole() {

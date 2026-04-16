@@ -165,10 +165,10 @@ public class AdminServiceImpl implements AdminService {
 
         // 使用 BCrypt 验证密码
         boolean isValid = passwordEncoder.matches(account.getPassword(), dbAdmin.getPassword());
-        log.info("密码验证"+isValid+"一致");
 
         // 如果密码不正确，抛出异常
         if (!isValid) {
+            log.warn("管理员登录失败: username=" + account.getUsername());
             throw new CustomerException("账号或密码错误");
         }
 

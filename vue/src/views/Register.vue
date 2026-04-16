@@ -23,7 +23,6 @@
         <el-form-item prop="avatar">
           <el-upload
               :action="fileUploadUrl"
-              :headers="{ token: data.user?.token }"
               :on-success="handleFileSuccess"
               list-type="picture"
           >

@@ -34,9 +34,9 @@ public interface UserService {
     /**
      * 批量删除用户
      *
-     * @param list 待删除的用户列表
+     * @param ids 待删除的用户ID列表
      */
-    void deleteBatch(List<User> list);
+    void deleteBatch(List<Integer> ids);
 
     /**
      * 查询所有用户信息

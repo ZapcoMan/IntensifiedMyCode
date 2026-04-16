@@ -76,14 +76,14 @@ public class UserController {
     /**
      * 批量删除用户
      *
-     * @param list 待删除的用户列表，通过请求体接收
+     * @param ids 待删除的用户ID列表，通过请求体接收
      * @return 返回批量删除操作的结果
      */
     @AuditLogRecord(action = "批量删除用户", resource = "用户")
     @Operation(summary = "批量删除用户")
     @DeleteMapping("/deleteBatch")
-    public R deleteBatch(@RequestBody List<User> list) {
-        userService.deleteBatch(list);
+    public R deleteBatch(@RequestBody List<Integer> ids) {
+        userService.deleteBatch(ids);
         return  R.ok();
     }
 

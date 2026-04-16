@@ -118,7 +118,7 @@ const load = () => {
   }).then(res => {
     if (res.code === 20000) {
       data.tableData = res.dataMap.pageInfo.list
-      data.total = res.dataMap.total
+      data.total = res.dataMap.pageInfo.total
     } else {
       ElMessage.error(res.message)
     }
@@ -199,7 +199,7 @@ const deleteBatch = () => {
   }
   ElMessageBox.confirm('删除后无法恢复，您确认删除吗？', '删除确认', { type: 'warning' })
       .then(() => {
-        deleteUsers(data.rows).then(res => {
+        deleteUsers(data.rows.map(v => v.id)).then(res => {
           if (res.code === 20000) {
             ElMessage.success('批量删除成功')
             load()

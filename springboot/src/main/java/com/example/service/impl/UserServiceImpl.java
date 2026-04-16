@@ -104,12 +104,12 @@ public class UserServiceImpl implements UserService {
     /**
      * 批量删除用户
      *
-     * @param list 需要删除的用户列表
+     * @param ids 需要删除的用户ID列表
      */
-    public void deleteBatch(List<User> list) {
-        // 遍历用户列表，逐个删除
-        for (User user : list) {
-            this.deleteById(user.getId());
+    public void deleteBatch(List<Integer> ids) {
+        // 遍历用户ID列表，逐个删除
+        for (Integer id : ids) {
+            this.deleteById(id);
         }
     }
 

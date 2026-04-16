@@ -152,14 +152,10 @@ class UserServiceImplTest extends TestBase {
     @DisplayName("批量删除用户 - 成功")
     void testDeleteBatch_Success() {
         // Given
-        User user1 = new User();
-        user1.setId(1);
-        User user2 = new User();
-        user2.setId(2);
-        List<User> userList = Arrays.asList(user1, user2);
+        List<Integer> ids = Arrays.asList(1, 2);
 
         // When
-        userService.deleteBatch(userList);
+        userService.deleteBatch(ids);
 
         // Then
         verify(userMapper, times(1)).deleteById(1);

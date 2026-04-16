@@ -25,6 +25,8 @@ public class AdminServiceImpl implements AdminService {
     @Resource AdminMapper adminMapper;
     @Resource
     RedisUtils redisUtils;
+    @Resource
+    TokenUtils tokenUtils;
     
     // 日志对象，用于记录系统日志
     private static final Log log = LogFactory.getLog(AdminServiceImpl.class);
@@ -166,7 +168,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         // 创建token并返回给前端
-        String token = TokenUtils.createToken(dbAdmin.getId() + "-" + "SUPER_ADMIN", dbAdmin.getPassword());
+        String token = tokenUtils.createToken(dbAdmin.getId() + "-" + "SUPER_ADMIN", dbAdmin.getPassword());
         dbAdmin.setToken(token);
         
         // 将用户信息缓存到Redis
@@ -191,7 +193,7 @@ public class AdminServiceImpl implements AdminService {
             throw  new CustomerException("500","你两次输入的密码不一致");
         }
         //判断原密码是否正确
-        Account currentUser = TokenUtils.getCurrentUser();
+        Account currentUser = tokenUtils.getCurrentUser();
         if(!account.getPassword().equals(currentUser.getPassword())){
             throw new CustomerException("500", "原密码输入错误");
         }

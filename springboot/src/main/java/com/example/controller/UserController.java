@@ -26,6 +26,9 @@ public class UserController {
     @Resource
     UserServiceImpl userServiceImpl;
 
+    @Resource
+    TokenUtils tokenUtils;
+
     /**
      * 添加新用户
      *
@@ -92,7 +95,7 @@ public class UserController {
     @Operation(summary = "验证Token")
     @GetMapping("/validateToken")
     public R validateToken() {
-        if (TokenUtils.validateToken()) {
+        if (tokenUtils.validateToken()) {
             return R.ok();
         } else {
             return R.error(ResultCodeEnum.TOKEN_INVALID,"Token已失效或不存在");

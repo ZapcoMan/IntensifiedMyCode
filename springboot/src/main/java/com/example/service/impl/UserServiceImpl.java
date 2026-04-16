@@ -26,6 +26,8 @@ public class UserServiceImpl implements UserService {
     RedisUtils redisUtils;
     @Resource
     DistributedLockUtils distributedLockUtils;
+    @Resource
+    TokenUtils tokenUtils;
 
     /**
      * 添加新用户
@@ -169,7 +171,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomerException("账号或密码错误");
         }
         // 创建token并返回给前端
-        String token = TokenUtils.createToken(dbUser.getId() + "-" + "USER", dbUser.getPassword());
+        String token = tokenUtils.createToken(dbUser.getId() + "-" + "USER", dbUser.getPassword());
         dbUser.setToken(token);
         
         // 将用户信息缓存到Redis
@@ -215,7 +217,7 @@ public class UserServiceImpl implements UserService {
             throw  new CustomerException("500","你两次输入的密码不一致");
         }
         // 判断原密码是否正确（当前用户密码已是 MD5Hex）
-        Account currentUser = TokenUtils.getCurrentUser();
+        Account currentUser = tokenUtils.getCurrentUser();
         String currentHash = DigestUtil.md5Hex(account.getPassword());
         if (!currentUser.getPassword().equals(currentHash)) {
             throw new CustomerException("500", "原密码输入错误");

@@ -4,7 +4,7 @@ import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
 import com.example.common.ResultCodeEnum;
 import com.example.entity.Admin;
-import com.example.service.impl.AdminServiceImpl;
+import com.example.service.AdminService;
 import com.example.utils.TokenUtils;
 import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
@@ -23,7 +23,10 @@ public class AdminController {
      * 注入Admin服务类，用于处理管理员相关的业务逻辑
      */
     @Resource
-    AdminServiceImpl adminServiceImpl;
+    AdminService adminService;
+
+    @Resource
+    TokenUtils tokenUtils;
 
 
 
@@ -41,7 +44,7 @@ public class AdminController {
     @PostMapping("/add")
     public R add(@RequestBody Admin admin) {
         // 调用AdminServiceImpl的add方法，执行管理员用户添加操作
-        adminServiceImpl.add(admin);
+        adminService.add(admin);
         // 返回操作成功的结果状态
         return R.ok();
     }
@@ -55,7 +58,7 @@ public class AdminController {
     @AuditLogRecord(action = "更新管理员信息", resource = "管理员")
     @PutMapping("/update")
     public R update(@RequestBody Admin admin) {
-        adminServiceImpl.update(admin);
+        adminService.update(admin);
         return R.ok();
     }
 
@@ -68,7 +71,7 @@ public class AdminController {
     @AuditLogRecord(action = "删除管理员", resource = "管理员")
     @DeleteMapping("/delete/{id}")
     public R delete(@PathVariable Integer id) {
-        adminServiceImpl.deleteById(id);
+        adminService.deleteById(id);
         return R.ok();
     }
 
@@ -81,7 +84,7 @@ public class AdminController {
     @DeleteMapping("/deleteBatch")
     @AuditLogRecord(action = "批量删除管理员", resource = "管理员")
     public R deleteBatch(@RequestBody List<Admin> list) {
-        adminServiceImpl.deleteBatch(list);
+        adminService.deleteBatch(list);
         return R.ok();
     }
 
@@ -94,7 +97,7 @@ public class AdminController {
     @Operation(summary = "验证Token")
     @GetMapping("/validateToken")
     public R validateToken() {
-        if (TokenUtils.validateToken()) {
+        if (tokenUtils.validateToken()) {
             return R.ok();
         } else {
             return R.error(ResultCodeEnum.TOKEN_INVALID,"Token已失效或不存在");
@@ -109,7 +112,7 @@ public class AdminController {
     @AuditLogRecord(action = "查询所有管理员", resource = "管理员")
     @GetMapping("/selectAll")
     public R selectAll() {
-        return R.ok().data("adminList", adminServiceImpl.selectAll());
+        return R.ok().data("adminList", adminService.selectAll());
     }
 
     /**
@@ -125,7 +128,7 @@ public class AdminController {
     public R selectPage(@RequestParam(defaultValue = "1") Integer pageNum,
                              @RequestParam(defaultValue = "10") Integer pageSize,
                              Admin admin) {
-        return R.ok().data("pageInfo", adminServiceImpl.selectPage(pageNum, pageSize, admin));
+        return R.ok().data("pageInfo", adminService.selectPage(pageNum, pageSize, admin));
     }
 
 }

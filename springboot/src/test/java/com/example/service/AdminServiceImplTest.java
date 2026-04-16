@@ -96,7 +96,8 @@ class AdminServiceImplTest extends TestBase {
 
         // Then
         verify(adminMapper, times(1)).insert(any(Admin.class));
-        assertEquals("123456", newAdmin.getPassword());
+        // 密码应该是 MD5Hex 加密后的值
+        assertEquals(cn.hutool.crypto.digest.DigestUtil.md5Hex("123456"), newAdmin.getPassword());
         assertEquals("SUPER_ADMIN", newAdmin.getRole());
     }
 

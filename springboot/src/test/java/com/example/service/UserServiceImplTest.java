@@ -5,6 +5,7 @@ import com.example.entity.Account;
 import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
+import com.example.mapper.UserRoleMapper;
 import com.example.service.impl.UserServiceImpl;
 import com.example.utils.DistributedLockUtils;
 import com.example.utils.PasswordEncoder;
@@ -48,6 +49,9 @@ class UserServiceImplTest extends TestBase {
     private TokenUtils tokenUtils;
 
     @Mock
+    private UserRoleMapper userRoleMapper;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -83,6 +87,7 @@ class UserServiceImplTest extends TestBase {
 
         when(userMapper.selectByUsername("newuser")).thenReturn(null);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("USER")).thenReturn(2);
 
         // When
         userService.add(newUser);
@@ -207,6 +212,7 @@ class UserServiceImplTest extends TestBase {
         when(distributedLockUtils.tryLock(anyString(), anyString(), anyInt())).thenReturn(true);
         when(userMapper.selectByUsername("registeruser")).thenReturn(null);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("USER")).thenReturn(2);
 
         // When
         userService.register(newUser);
@@ -388,6 +394,7 @@ class UserServiceImplTest extends TestBase {
 
         when(userMapper.selectByUsername(username)).thenReturn(null);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("USER")).thenReturn(2);
 
         // When
         userService.add(newUser);

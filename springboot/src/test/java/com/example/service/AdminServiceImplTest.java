@@ -5,6 +5,7 @@ import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
+import com.example.mapper.UserRoleMapper;
 import com.example.service.impl.AdminServiceImpl;
 import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
@@ -43,6 +44,9 @@ class AdminServiceImplTest extends TestBase {
     private TokenUtils tokenUtils;
 
     @Mock
+    private UserRoleMapper userRoleMapper;
+
+    @Mock
     private PasswordEncoder passwordEncoder;
 
     @InjectMocks
@@ -78,6 +82,7 @@ class AdminServiceImplTest extends TestBase {
 
         when(adminMapper.selectByUsername("newadmin")).thenReturn(null);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("SUPER_ADMIN")).thenReturn(1);
 
         // When
         adminService.add(newAdmin);
@@ -99,6 +104,7 @@ class AdminServiceImplTest extends TestBase {
 
         when(adminMapper.selectByUsername("newadmin")).thenReturn(null);
         when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("SUPER_ADMIN")).thenReturn(1);
 
         // When
         adminService.add(newAdmin);
@@ -366,6 +372,8 @@ class AdminServiceImplTest extends TestBase {
         newAdmin.setPassword("123456");
 
         when(adminMapper.selectByUsername(username)).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("SUPER_ADMIN")).thenReturn(1);
 
         // When
         adminService.add(newAdmin);

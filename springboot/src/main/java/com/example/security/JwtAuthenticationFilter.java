@@ -44,7 +44,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     // 白名单列表，这些路径不需要进行token验证
     private final static List<String> WHITE_LIST = Arrays.asList(
             "/login", "/register",
-            "/files/upload", "/files/download", "/favicon.ico"
+            "/files/upload/", "/files/download/", "/favicon.ico"
     );
 
     /**
@@ -63,9 +63,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
         // 获取请求URI
         String uri = request.getRequestURI();
-        // 检查是否在白名单内
+        // 检查是否在白名单内（精确匹配或前缀匹配）
         for (String white : WHITE_LIST) {
-            if (uri.startsWith(white)) {
+            if (uri.equals(white) || uri.startsWith(white)) {
                 filterChain.doFilter(request, response);
                 return;
             }

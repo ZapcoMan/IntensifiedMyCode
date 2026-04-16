@@ -47,7 +47,7 @@ const updatePassword = () => {
       request.post('/updatePassword', data.user).then(res => {
         if (res.code === 20000) {
           ElMessage.success('修改成功')
-          setInterval(() => {
+          setTimeout(() => {
             localStorage.removeItem('code_user')
             location.href = '/login'
           }, 500)

@@ -55,12 +55,13 @@
 
 <script setup>
 import { reactive, ref } from 'vue'
-
 import request from '@/utils/request.js'
 import { ElMessage } from 'element-plus'
 import router from '@/router/index.js'
 import { User, Lock, Key } from '@element-plus/icons-vue'
+import { useUserStore } from '@/stores/user'
 
+const userStore = useUserStore()
 const formRef = ref()
 
 const data = reactive({
@@ -80,8 +81,9 @@ const login = () => {
     if (valid) {
       request.post('/login', data.form).then(res => {
         if (res.code === 20000) {
-          localStorage.setItem("code_user", JSON.stringify(res.data || {}))
-          localStorage.setItem("token", res.data.token)
+          // 使用 Pinia store 保存用户信息和 token
+          userStore.setUser(res.data || {})
+          userStore.setToken(res.data.token)
           ElMessage.success('登录成功')
           router.push('/manager/index')
         } else {
@@ -91,9 +93,6 @@ const login = () => {
     }
   })
 }
-
-
-
 
 </script>
 

@@ -123,7 +123,7 @@ const load = () => {
     console.log(res.dataMap)
     if (res.code === 20000) {
       data.tableData = res.dataMap.pageInfo.list
-      data.total = res.dataMap.total
+      data.total = res.dataMap.pageInfo.total  // ✅ 修复：从 pageInfo.total 获取
     } else {
       ElMessage.error(res.message)
     }
@@ -183,7 +183,7 @@ const del = (id) => {
 const update = () => {
   formRef.value.validate((valid) => {
     if (valid) {
-      request.post('/admin/update', data.form).then(res => {
+      request.put('/admin/update', data.form).then(res => {
         if (res.code === 20000) {
           data.formVisible = false
           ElMessage.success('修改成功')
@@ -213,7 +213,7 @@ const deleteBatch = () => {
   }
   ElMessageBox.confirm('删除后无法恢复，您确认删除吗？', '删除确认', { type: 'warning' })
       .then(() => {
-        request.post('/admin/deleteBatch', data.rows.map(v => v.id)).then(res => {
+        request.delete('/admin/deleteBatch', { data: data.rows.map(v => v.id) }).then(res => {
           if (res.code === 20000) {
             ElMessage.success('批量删除成功')
             load()

@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useUserStore } from '@/stores/user'
 
 // 创建一个路由实例
 const router = createRouter({
@@ -33,18 +34,19 @@ const router = createRouter({
     // 404页面路由配置
     { path: '/notfound', component: () =>import('../views/404.vue'),},
     // 捕获所有未匹配到的路径并重定向到404页面
-    { path: '/:pathMatch(.*)', redirect: '/notFound' },
+    { path: '/:pathMatch(.*)', redirect: '/notfound' },
 
   ],
 })
 
 // 添加路由守卫，防止已登录用户访问登录页面并验证token有效性
 router.beforeEach(async (to, from, next) => {
+  const userStore = useUserStore()
+  
   // 如果用户访问登录页面或其子路径
   if (to.path.startsWith('/login')) {
-    // 检查本地存储中是否有用户信息
-    const user = localStorage.getItem('code_user')
-    if (user) {
+    // 检查是否已登录
+    if (userStore.isLoggedIn) {
       // 如果已登录，重定向到首页
       next('/manager/index')
     } else {
@@ -53,8 +55,7 @@ router.beforeEach(async (to, from, next) => {
     }
   } else {
     // 检查是否已登录，如果已登录则验证token是否有效
-    const user = localStorage.getItem('code_user')
-    if (user) {
+    if (userStore.isLoggedIn) {
       try {
         // 验证token是否仍然有效
         const res = await import('@/api/auth.js')
@@ -64,14 +65,12 @@ router.beforeEach(async (to, from, next) => {
           next()
         } else {
           // Token无效，清除本地存储并重定向到登录页面
-          localStorage.removeItem('code_user')
-          localStorage.removeItem('token')
+          userStore.clearUser()
           next('/login')
         }
       } catch (error) {
         // 验证失败，可能是网络问题或token已过期
-        localStorage.removeItem('code_user')
-        localStorage.removeItem('token')
+        userStore.clearUser()
         next('/login')
       }
     } else {

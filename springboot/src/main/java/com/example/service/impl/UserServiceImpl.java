@@ -5,6 +5,7 @@ import com.example.entity.Account;
 import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
+import com.example.mapper.UserRoleMapper;
 import com.example.service.UserService;
 import com.example.utils.DistributedLockUtils;
 import com.example.utils.PasswordEncoder;
@@ -28,6 +29,8 @@ public class UserServiceImpl implements UserService {
     DistributedLockUtils distributedLockUtils;
     @Resource
     TokenUtils tokenUtils;
+    @Resource
+    UserRoleMapper userRoleMapper;
     @Resource
     PasswordEncoder passwordEncoder;
 
@@ -62,6 +65,12 @@ public class UserServiceImpl implements UserService {
         user.setRole("USER");
         // 插入用户数据到数据库（密码已在调用处加密，或使用默认加密密码）
         userMapper.insert(user);
+        
+        // ✅ 插入用户角色关联（RBAC）
+        Integer roleId = userRoleMapper.selectIdByCode("USER");
+        if (roleId != null && user.getId() != null) {
+            userRoleMapper.insert(user.getId(), roleId);
+        }
     }
 
     /**
@@ -172,7 +181,7 @@ public class UserServiceImpl implements UserService {
             throw new CustomerException("账号或密码错误");
         }
         // 创建token并返回给前端
-        String token = tokenUtils.createToken(dbUser.getId() + "-" + "USER", dbUser.getPassword());
+        String token = tokenUtils.createToken(dbUser.getId().toString(), "USER");
         dbUser.setToken(token);
         
         // 将用户信息缓存到Redis

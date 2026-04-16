@@ -5,6 +5,7 @@ import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
+import com.example.mapper.UserRoleMapper;
 import com.example.service.AdminService;
 import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
@@ -27,6 +28,8 @@ public class AdminServiceImpl implements AdminService {
     RedisUtils redisUtils;
     @Resource
     TokenUtils tokenUtils;
+    @Resource
+    UserRoleMapper userRoleMapper;
     @Resource
     PasswordEncoder passwordEncoder;
     
@@ -54,6 +57,12 @@ public class AdminServiceImpl implements AdminService {
         }
         admin.setRole("SUPER_ADMIN");
         adminMapper.insert(admin);
+        
+        // ✅ 插入用户角色关联（RBAC）
+        Integer roleId = userRoleMapper.selectIdByCode("SUPER_ADMIN");
+        if (roleId != null && admin.getId() != null) {
+            userRoleMapper.insert(admin.getId(), roleId);
+        }
     }
 
     /**
@@ -164,7 +173,7 @@ public class AdminServiceImpl implements AdminService {
         }
 
         // 创建token并返回给前端
-        String token = tokenUtils.createToken(dbAdmin.getId() + "-" + "SUPER_ADMIN", dbAdmin.getPassword());
+        String token = tokenUtils.createToken(dbAdmin.getId().toString(), "SUPER_ADMIN");
         dbAdmin.setToken(token);
         
         // 将用户信息缓存到Redis

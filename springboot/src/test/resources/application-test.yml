@@ -1,0 +1,28 @@
+# ==========================================================
+# 测试环境配置
+# 使用 H2 内存数据库，测试结束后自动清空，不污染真实数据库
+# ==========================================================
+spring:
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DB_CLOSE_DELAY=-1;DATABASE_TO_UPPER=false
+    username: sa
+    password: 
+  sql:
+    init:
+      mode: always
+      # 复用 Flyway 的迁移脚本建表
+      schema-locations: classpath:db/migration/V1__init_schema.sql
+      encoding: UTF-8
+  flyway:
+    enabled: false  # 测试跳过 Flyway，手动用 SQL 初始化
+  data:
+    redis:
+      host: localhost
+      port: 6379
+      database: 10  # 用独立 DB，避免污染开发数据
+
+logging:
+  level:
+    com.example: DEBUG
+    org.springframework.security: DEBUG

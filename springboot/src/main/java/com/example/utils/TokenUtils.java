@@ -22,7 +22,6 @@ import java.util.Date;
 @Component
 public class TokenUtils {
 
-    // 注入AdminServiceImpl和UserServiceImpl用于获取用户信息
     @Resource
     AdminServiceImpl adminServiceImpl;
     @Resource
@@ -31,13 +30,11 @@ public class TokenUtils {
     RedisUtils redisUtils;
 
     // 静态变量用于存储Service实例，以便在静态方法中使用
-    static AdminServiceImpl staticAdminServiceImpl;;
-    static UserServiceImpl staticUserServiceImpl;
-    static RedisUtils staticRedisUtils;
+    // volatile 保证多线程可见性，防止 @PostConstruct 未执行时出现空指针
+    static volatile AdminServiceImpl staticAdminServiceImpl;
+    static volatile UserServiceImpl staticUserServiceImpl;
+    static volatile RedisUtils staticRedisUtils;
 
-    /**
-     * 在Spring Boot工程启动后初始化静态变量
-     */
     @PostConstruct
     public void init() {
         staticAdminServiceImpl = adminServiceImpl;
@@ -47,21 +44,23 @@ public class TokenUtils {
 
     /**
      * 生成Token
-     * @param data Token中的载荷数据，这里包含用户ID和角色，用"-"分隔
+     * @param data Token中的载荷数据，包含用户ID和角色，用"-"分隔
      * @param sign Token的密钥，用于签名
      * @return 生成的Token字符串
      */
     public static String createToken(String data, String sign) {
-        String token = JWT.create().withAudience(data) // 将 userId-role 保存到 token 里面,作为载荷
-                .withExpiresAt(DateUtil.offsetDay(new Date(), 1)) // 1天后token过期
-                .sign(Algorithm.HMAC256(sign)); // 以 password 作为 token 的密钥, HMAC256算法加密
+        String token = JWT.create().withAudience(data)
+                .withExpiresAt(DateUtil.offsetDay(new Date(), 1))
+                .sign(Algorithm.HMAC256(sign));
 
-        // 将token存储到Redis中，用于后续验证
-        String[] split = data.split("-");
-        String userId = split[0];
-        String role = split[1];
-        String tokenKey = "token:user:" + userId + ":" + role;
-        staticRedisUtils.set(tokenKey, token, 1, java.util.concurrent.TimeUnit.DAYS);
+        // 将token存储到Redis中
+        if (staticRedisUtils != null) {
+            String[] split = data.split("-");
+            String userId = split[0];
+            String role = split[1];
+            String tokenKey = "token:user:" + userId + ":" + role;
+            staticRedisUtils.set(tokenKey, token, 1, java.util.concurrent.TimeUnit.DAYS);
+        }
 
         return token;
     }
@@ -72,8 +71,13 @@ public class TokenUtils {
      */
     public static Account getCurrentUser() {
         // 获取当前请求的HttpServletRequest对象
-        HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
-        // 优先从请求头中获取Token，如果不存在，则从请求参数中获取
+        ServletRequestAttributes attrs = (ServletRequestAttributes) RequestContextHolder.getRequestAttributes();
+        if (attrs == null) {
+            return null; // 测试环境无 HTTP 上下文时直接返回 null，避免抛异常
+        }
+        HttpServletRequest request = attrs.getRequest();
+
+        // 优先从请求头中获取Token，如果不存在则从请求参数中获取
         String token = request.getHeader("token");
         if (StrUtil.isBlank(token)) {
             token = request.getParameter("token");
@@ -91,17 +95,17 @@ public class TokenUtils {
 
         // 从Redis中获取用户信息
         String cacheKey = "user:info:" + userId + ":" + role;
-        Account account = staticRedisUtils.get(cacheKey);
+        Account account = staticRedisUtils != null ? staticRedisUtils.get(cacheKey) : null;
 
         if (account == null) {
             // 如果Redis中没有，则从数据库查询
             if ("SUPER_ADMIN".equals(role)) {
-                account = staticAdminServiceImpl.selectById(userId);
+                account = staticAdminServiceImpl != null ? staticAdminServiceImpl.selectById(userId) : null;
             } else if ("USER".equals(role)) {
-                account = staticUserServiceImpl.selectById(userId);
+                account = staticUserServiceImpl != null ? staticUserServiceImpl.selectById(userId) : null;
             }
 
-            if (account != null) {
+            if (account != null && staticRedisUtils != null) {
                 // 将用户信息缓存到Redis
                 staticRedisUtils.set(cacheKey, account, 30, java.util.concurrent.TimeUnit.MINUTES);
             }
@@ -129,10 +133,12 @@ public class TokenUtils {
      * @param role 用户角色
      */
     public static void removeToken(String userId, String role) {
-        String tokenKey = "token:user:" + userId + ":" + role;
-        staticRedisUtils.remove(tokenKey);
+        if (staticRedisUtils != null) {
+            String tokenKey = "token:user:" + userId + ":" + role;
+            staticRedisUtils.remove(tokenKey);
 
-        String cacheKey = "user:info:" + userId + ":" + role;
-        staticRedisUtils.remove(cacheKey);
+            String cacheKey = "user:info:" + userId + ":" + role;
+            staticRedisUtils.remove(cacheKey);
+        }
     }
 }

@@ -1,6 +1,5 @@
 package com.example.service;
 
-import cn.hutool.crypto.digest.DigestUtil;
 import com.example.TestBase;
 import com.example.entity.Account;
 import com.example.entity.User;
@@ -8,6 +7,7 @@ import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
 import com.example.service.impl.UserServiceImpl;
 import com.example.utils.DistributedLockUtils;
+import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
@@ -47,6 +47,9 @@ class UserServiceImplTest extends TestBase {
     @Mock
     private TokenUtils tokenUtils;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private UserServiceImpl userService;
 
@@ -60,7 +63,7 @@ class UserServiceImplTest extends TestBase {
         testUser.setId(1);
         testUser.setUsername("testuser");
         testUser.setName("测试用户");
-        testUser.setPassword(DigestUtil.md5Hex("123456"));
+        testUser.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("123456"));
         testUser.setRole("USER");
         testUser.setAvatar("http://example.com/avatar.jpg");
 
@@ -79,6 +82,7 @@ class UserServiceImplTest extends TestBase {
         newUser.setPassword("123456");
 
         when(userMapper.selectByUsername("newuser")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
 
         // When
         userService.add(newUser);
@@ -202,6 +206,7 @@ class UserServiceImplTest extends TestBase {
 
         when(distributedLockUtils.tryLock(anyString(), anyString(), anyInt())).thenReturn(true);
         when(userMapper.selectByUsername("registeruser")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
 
         // When
         userService.register(newUser);
@@ -239,6 +244,7 @@ class UserServiceImplTest extends TestBase {
         loginAccount.setPassword("123456");
 
         when(userMapper.selectByUsername("testuser")).thenReturn(testUser);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(redisUtils.set(anyString(), any(User.class), anyLong(), any(TimeUnit.class))).thenReturn(true);
         when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 
@@ -280,6 +286,7 @@ class UserServiceImplTest extends TestBase {
         loginAccount.setPassword("wrongpassword");
 
         when(userMapper.selectByUsername("testuser")).thenReturn(testUser);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         // When & Then
         CustomerException exception = assertThrows(CustomerException.class, () -> {
@@ -380,6 +387,7 @@ class UserServiceImplTest extends TestBase {
         newUser.setPassword("123456");
 
         when(userMapper.selectByUsername(username)).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
 
         // When
         userService.add(newUser);

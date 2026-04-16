@@ -7,9 +7,11 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.entity.Account;
 import com.example.enums.RoleEnum;
 import com.example.exception.CustomerException;
-import com.example.service.AccountService;
+import com.example.service.AdminService;
+import com.example.service.UserService;
+import com.example.strategy.Context.RoleStrategyContext;
+import com.example.strategy.RoleStrategy;
 import com.example.utils.RedisUtils;
-import jakarta.annotation.PostConstruct;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
@@ -29,29 +31,22 @@ import java.util.*;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Resource
-    private List<AccountService> accountServices;
+    private RoleStrategyContext roleStrategyContext;
+
+    @Resource
+    private AdminService adminService;
+
+    @Resource
+    private UserService userService;
 
     @Resource
     private RedisUtils redisUtils;
-
-    // 服务映射，根据角色代码获取对应的AccountService实现类
-    private final Map<String, AccountService> serviceMap = new HashMap<>();
 
     // 白名单列表，这些路径不需要进行token验证
     private final static List<String> WHITE_LIST = Arrays.asList(
             "/login", "/register",
             "/files/upload", "/files/download", "/favicon.ico"
     );
-
-    /**
-     * 初始化serviceMap，将角色代码与AccountService实现类映射
-     */
-    @PostConstruct
-    public void initMap() {
-        for (AccountService service : accountServices) {
-            serviceMap.put(service.getRole().getCode(), service);
-        }
-    }
 
     /**
      * 过滤器主要逻辑，对请求进行token验证
@@ -103,12 +98,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             Account account = redisUtils.get(cacheKey);
 
             if (account == null) {
-                // 如果Redis中没有，则从数据库查询
-                AccountService service = serviceMap.get(role);
-                if (service == null) throw new CustomerException("401", "非法角色");
-
-                account = service.selectById(userId);
-                if (account == null) throw new CustomerException("401", "用户不存在");
+                // 如果Redis中没有，则从数据库查询（直接使用 Service 层）
+                if (RoleEnum.isAdminRole(role)) {
+                    account = adminService.selectById(userId);
+                } else if (RoleEnum.isUserRole(role)) {
+                    account = userService.selectById(userId);
+                }
+                
+                if (account == null) {
+                    throw new CustomerException("401", "用户不存在");
+                }
 
                 // 将账户信息缓存到Redis，设置有效期为30分钟
                 redisUtils.set(cacheKey, account, 30, java.util.concurrent.TimeUnit.MINUTES);
@@ -123,11 +122,27 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                     new UsernamePasswordAuthenticationToken(account.getUsername(), null, Collections.emptyList());
             SecurityContextHolder.getContext().setAuthentication(authToken);
 
-        } catch (Exception ignored) {
-            // 任何异常均视为验证失败，直接放行
+        } catch (CustomerException e) {
+            // 业务异常（如用户不存在、非法角色），返回401错误
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(String.format(
+                "{\"code\":\"%s\",\"message\":\"%s\"}",
+                e.getCode() != null ? e.getCode() : "401",
+                e.getMsg()
+            ));
+            return; // 不再继续执行过滤链
+        } catch (Exception e) {
+            // 其他异常（如Token解析失败、签名验证失败），返回401错误
+            response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+            response.setContentType("application/json;charset=UTF-8");
+            response.getWriter().write(
+                "{\"code\":\"401\",\"message\":\"Token验证失败或已过期\"}"
+            );
+            return; // 不再继续执行过滤链
         }
 
-        // 继续执行过滤链
+        // 验证通过，继续执行过滤链
         filterChain.doFilter(request, response);
     }
 }

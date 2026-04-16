@@ -5,6 +5,7 @@ import cn.hutool.core.util.StrUtil;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.entity.Account;
+import com.example.enums.RoleEnum;
 import com.example.service.AdminService;
 import com.example.service.UserService;
 import jakarta.annotation.Resource;
@@ -88,10 +89,10 @@ public class TokenUtils {
         Account account = redisUtils != null ? redisUtils.get(cacheKey) : null;
 
         if (account == null) {
-            // 如果Redis中没有，则从数据库查询
-            if ("SUPER_ADMIN".equals(role) || "DEPT_ADMIN".equals(role) || "CLUB_LEADER".equals(role)) {
+            // 如果Redis中没有，则从数据库查询（使用枚举统一管理角色判断）
+            if (RoleEnum.isAdminRole(role)) {
                 account = adminService != null ? adminService.selectById(userId) : null;
-            } else if ("USER".equals(role) || "STUDENT".equals(role)) {
+            } else if (RoleEnum.isUserRole(role)) {
                 account = userService != null ? userService.selectById(userId) : null;
             }
 

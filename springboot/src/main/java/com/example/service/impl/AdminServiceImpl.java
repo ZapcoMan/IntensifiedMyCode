@@ -1,12 +1,12 @@
 package com.example.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
 import com.example.service.AdminService;
+import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
@@ -27,6 +27,8 @@ public class AdminServiceImpl implements AdminService {
     RedisUtils redisUtils;
     @Resource
     TokenUtils tokenUtils;
+    @Resource
+    PasswordEncoder passwordEncoder;
     
     // 日志对象，用于记录系统日志
     private static final Log log = LogFactory.getLog(AdminServiceImpl.class);
@@ -43,12 +45,12 @@ public class AdminServiceImpl implements AdminService {
         if (dbAdmin != null) {
             throw new CustomerException("账号重复");
         }
-        // 默认密码（MD5Hex 加密后存储，与 User 保持一致）
+        // BCrypt 加密后存储，与 User 保持一致
         if (StrUtil.isBlank(admin.getPassword())) {
-            admin.setPassword(DigestUtil.md5Hex("123456"));
+            admin.setPassword(passwordEncoder.encode("123456"));
         } else {
             // 明文传入的密码也统一加密存储
-            admin.setPassword(DigestUtil.md5Hex(admin.getPassword()));
+            admin.setPassword(passwordEncoder.encode(admin.getPassword()));
         }
         admin.setRole("SUPER_ADMIN");
         adminMapper.insert(admin);
@@ -152,14 +154,8 @@ public class AdminServiceImpl implements AdminService {
             throw new CustomerException("账号不存在");
         }
 
-        // 获取输入的密码和数据库中的密码
-        String InputPassWord = account.getPassword();
-        String dbAdminPassword = dbAdmin.getPassword();
-
-        // 生成输入密码的摘要
-        String inputHash = cn.hutool.crypto.digest.DigestUtil.md5Hex(InputPassWord);
-        // 验证密码是否匹配
-        boolean isValid = dbAdminPassword.equals(inputHash);
+        // 使用 BCrypt 验证密码
+        boolean isValid = passwordEncoder.matches(account.getPassword(), dbAdmin.getPassword());
         log.info("密码验证"+isValid+"一致");
 
         // 如果密码不正确，抛出异常
@@ -188,20 +184,19 @@ public class AdminServiceImpl implements AdminService {
      * @throws CustomerException 如果新密码和确认密码不一致，或者原密码错误，抛出自定义异常
      */
     public void updatePassword(Account account) {
-        //判断新密码和旧密码是否相等
+        //判断新密码和确认密码是否相等
         if(!account.getNewpassword().equals(account.getNew2password())){
             throw  new CustomerException("500","你两次输入的密码不一致");
         }
-        //判断原密码是否正确
+        //判断原密码是否正确（使用 BCrypt 验证）
         Account currentUser = tokenUtils.getCurrentUser();
-        if(!account.getPassword().equals(currentUser.getPassword())){
+        if(!passwordEncoder.matches(account.getPassword(), currentUser.getPassword())){
             throw new CustomerException("500", "原密码输入错误");
         }
-        //开始更新密码
-        //MD5 加密
-        account.setNewpassword(cn.hutool.crypto.digest.DigestUtil.md5Hex(account.getNewpassword()));
+        //开始更新密码（BCrypt 加密存储）
+        String newPasswordHash = passwordEncoder.encode(account.getNewpassword());
         Admin admin = adminMapper.selectById(currentUser.getId().toString());
-        admin.setPassword(account.getNewpassword());
+        admin.setPassword(newPasswordHash);
         adminMapper.updateById(admin);
         
         // 清除Redis中的缓存

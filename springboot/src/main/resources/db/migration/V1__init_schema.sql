@@ -42,7 +42,9 @@ CREATE TABLE `role` (
 
 INSERT INTO `role` (`id`, `code`, `name`, `description`) VALUES
     (1, 'SUPER_ADMIN', '超级管理员', '拥有全部管理权限'),
-    (2, 'USER', '普通用户', '仅可访问首页');
+    (2, 'DEPT_ADMIN', '部门管理员', '管理部门内部事务'),
+    (3, 'CLUB_LEADER', '社团负责人', '管理社团相关事务'),
+    (4, 'USER', '普通用户', '仅可访问首页');
 
 -- ----------------------------
 -- 3. users 用户表（Mapper 全用 users 表）
@@ -64,7 +66,7 @@ CREATE TABLE `users` (
     INDEX `idx_users_status`(`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 初始账户：admin1，密码 123456 的 MD5Hex = e10adc3949ba59abbe56e057f20f883e
+-- 初始账户：admin1，密码 admin 的 BCrypt = $10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `avatar`, `email`, `phone`, `status`, `created_at`) VALUES
     (1, 'admin1', '$10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg', NULL, NULL, 'ENABLE', '2026-01-09 18:53:09');
 

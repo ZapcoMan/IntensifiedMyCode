@@ -1,12 +1,12 @@
 package com.example.service;
 
-import cn.hutool.crypto.digest.DigestUtil;
 import com.example.TestBase;
 import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.exception.CustomerException;
 import com.example.mapper.AdminMapper;
 import com.example.service.impl.AdminServiceImpl;
+import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageInfo;
@@ -42,6 +42,9 @@ class AdminServiceImplTest extends TestBase {
     @Mock
     private TokenUtils tokenUtils;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     @InjectMocks
     private AdminServiceImpl adminService;
 
@@ -55,7 +58,7 @@ class AdminServiceImplTest extends TestBase {
         testAdmin.setId(1);
         testAdmin.setUsername("admin");
         testAdmin.setName("超级管理员");
-        testAdmin.setPassword(DigestUtil.md5Hex("123456"));
+        testAdmin.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode("123456"));
         testAdmin.setRole("SUPER_ADMIN");
         testAdmin.setAvatar("http://example.com/admin-avatar.jpg");
 
@@ -74,6 +77,7 @@ class AdminServiceImplTest extends TestBase {
         newAdmin.setPassword("123456");
 
         when(adminMapper.selectByUsername("newadmin")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
 
         // When
         adminService.add(newAdmin);
@@ -94,14 +98,16 @@ class AdminServiceImplTest extends TestBase {
         // 不设置密码，应该使用默认密码
 
         when(adminMapper.selectByUsername("newadmin")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
 
         // When
         adminService.add(newAdmin);
 
         // Then
         verify(adminMapper, times(1)).insert(any(Admin.class));
-        // 密码应该是 MD5Hex 加密后的值
-        assertEquals(cn.hutool.crypto.digest.DigestUtil.md5Hex("123456"), newAdmin.getPassword());
+        // 密码应该是 BCrypt 加密后的值（以 $2a$ 开头）
+        assertNotNull(newAdmin.getPassword());
+        assertTrue(newAdmin.getPassword().startsWith("$2a$"));
         assertEquals("SUPER_ADMIN", newAdmin.getRole());
     }
 
@@ -216,6 +222,7 @@ class AdminServiceImplTest extends TestBase {
         loginAccount.setPassword("123456");
 
         when(adminMapper.selectByUsername("admin")).thenReturn(testAdmin);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(redisUtils.set(anyString(), any(Admin.class), anyLong(), any(TimeUnit.class))).thenReturn(true);
         when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 
@@ -258,6 +265,7 @@ class AdminServiceImplTest extends TestBase {
         loginAccount.setPassword("wrongpassword");
 
         when(adminMapper.selectByUsername("admin")).thenReturn(testAdmin);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(false);
 
         // When & Then
         CustomerException exception = assertThrows(CustomerException.class, () -> {
@@ -391,10 +399,11 @@ class AdminServiceImplTest extends TestBase {
         Admin mockAdmin = new Admin();
         mockAdmin.setId(1);
         mockAdmin.setUsername("admin");
-        mockAdmin.setPassword(cn.hutool.crypto.digest.DigestUtil.md5Hex(password));
+        mockAdmin.setPassword(new org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder().encode(password));
         mockAdmin.setRole("SUPER_ADMIN");
 
         when(adminMapper.selectByUsername("admin")).thenReturn(mockAdmin);
+        when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(redisUtils.set(anyString(), any(Admin.class), anyLong(), any())).thenReturn(true);
         when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
 

@@ -1,13 +1,13 @@
 package com.example.service.impl;
 
 import cn.hutool.core.util.StrUtil;
-import cn.hutool.crypto.digest.DigestUtil;
 import com.example.entity.Account;
 import com.example.entity.User;
 import com.example.exception.CustomerException;
 import com.example.mapper.UserMapper;
 import com.example.service.UserService;
 import com.example.utils.DistributedLockUtils;
+import com.example.utils.PasswordEncoder;
 import com.example.utils.RedisUtils;
 import com.example.utils.TokenUtils;
 import com.github.pagehelper.PageHelper;
@@ -28,6 +28,8 @@ public class UserServiceImpl implements UserService {
     DistributedLockUtils distributedLockUtils;
     @Resource
     TokenUtils tokenUtils;
+    @Resource
+    PasswordEncoder passwordEncoder;
 
     /**
      * 添加新用户
@@ -45,12 +47,12 @@ public class UserServiceImpl implements UserService {
         if (dbUser != null) {
             throw new CustomerException("账号重复");
         }
-        // 默认密码（MD5Hex 加密后存储，与 Admin 保持一致）
+        // BCrypt 加密后存储，与 Admin 保持一致
         if (StrUtil.isBlank(user.getPassword())) {
-            user.setPassword(DigestUtil.md5Hex("123456"));
+            user.setPassword(passwordEncoder.encode("123456"));
         } else {
             // 明文传入的密码也统一加密存储
-            user.setPassword(DigestUtil.md5Hex(user.getPassword()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         // 如果未设置用户名，则使用账号作为用户名
         if (StrUtil.isBlank(user.getName())) {
@@ -165,9 +167,8 @@ public class UserServiceImpl implements UserService {
         if (dbUser == null) {
             throw new CustomerException("账号不存在");
         }
-        // 验证密码是否正确（统一使用 MD5Hex 加密比对，与 Admin 一致）
-        String inputHash = DigestUtil.md5Hex(account.getPassword());
-        if (!dbUser.getPassword().equals(inputHash)) {
+        // 使用 BCrypt 验证密码
+        if (!passwordEncoder.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomerException("账号或密码错误");
         }
         // 创建token并返回给前端
@@ -216,15 +217,14 @@ public class UserServiceImpl implements UserService {
         if(!account.getNewpassword().equals(account.getNew2password())){
             throw  new CustomerException("500","你两次输入的密码不一致");
         }
-        // 判断原密码是否正确（当前用户密码已是 MD5Hex）
+        // 判断原密码是否正确（使用 BCrypt 验证）
         Account currentUser = tokenUtils.getCurrentUser();
-        String currentHash = DigestUtil.md5Hex(account.getPassword());
-        if (!currentUser.getPassword().equals(currentHash)) {
+        if (!passwordEncoder.matches(account.getPassword(), currentUser.getPassword())) {
             throw new CustomerException("500", "原密码输入错误");
         }
-        // 开始更新密码（MD5Hex 加密存储，与 Admin 保持一致）
+        // 开始更新密码（BCrypt 加密存储，与 Admin 保持一致）
         User user = userMapper.selectById(currentUser.getId().toString());
-        user.setPassword(DigestUtil.md5Hex(account.getNewpassword()));
+        user.setPassword(passwordEncoder.encode(account.getNewpassword()));
         userMapper.updateById(user);
         
         // 清除Redis中的缓存

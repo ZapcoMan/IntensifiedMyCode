@@ -1,7 +1,6 @@
 package com.example.aspect;
 
 import com.example.annotation.AuditLogRecord;
-import com.example.controller.NotificationController;
 import com.example.entity.AuditLog;
 import com.example.service.AuditLogService;
 
@@ -21,6 +20,7 @@ import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
 import java.util.Arrays;
+import java.util.stream.Collectors;
 
 // 定义一个切面类，用于处理审计日志
 @Aspect
@@ -55,14 +55,15 @@ public class AuditLogAspect {
             // 执行被拦截的方法
             Object result = joinPoint.proceed();
             
-            // 记录成功的审计日志
+            // 记录成功的审计日志（脱敏处理）
             long duration = System.currentTimeMillis() - startTime;
+            String safeDetails = sanitizeArgs(joinPoint.getArgs());
             AuditLog successLog = AuditLog.builder()
                     .username(username)
                     .action(auditLogRecord.action())
                     .resource(auditLogRecord.resource())
                     .ipAddress(ip)
-                    .details(Arrays.toString(joinPoint.getArgs()))
+                    .details(safeDetails)
                     .build();
             auditLogService.saveLog(successLog);
             
@@ -71,14 +72,15 @@ public class AuditLogAspect {
             
             return result;
         } catch (Throwable e) {
-            // 记录失败的审计日志
+            // 记录失败的审计日志（脱敏处理）
             long duration = System.currentTimeMillis() - startTime;
+            String safeDetails = sanitizeArgs(joinPoint.getArgs());
             AuditLog errorLog = AuditLog.builder()
                     .username(username)
                     .action(auditLogRecord.action())
                     .resource(auditLogRecord.resource())
                     .ipAddress(ip)
-                    .details(Arrays.toString(joinPoint.getArgs()) + " | 异常: " + e.getMessage())
+                    .details(safeDetails + " | 异常: " + e.getMessage())
                     .build();
             auditLogService.saveLog(errorLog);
             
@@ -88,6 +90,46 @@ public class AuditLogAspect {
             // 继续抛出异常，让上层处理
             throw e;
         }
+    }
+
+    /**
+     * 脱敏处理方法参数，防止密码等敏感信息泄露
+     * @param args 方法参数数组
+     * @return 脱敏后的参数字符串
+     */
+    private String sanitizeArgs(Object[] args) {
+        if (args == null || args.length == 0) {
+            return "[]";
+        }
+        
+        // 将参数数组转换为字符串，并对每个参数进行脱敏处理
+        String sanitized = Arrays.stream(args)
+                .map(this::sanitizeArg)
+                .collect(Collectors.joining(", "));
+        
+        return "[" + sanitized + "]";
+    }
+
+    /**
+     * 脱敏单个参数
+     * @param arg 参数对象
+     * @return 脱敏后的字符串
+     */
+    private String sanitizeArg(Object arg) {
+        if (arg == null) {
+            return "null";
+        }
+        
+        String argStr = arg.toString();
+        
+        // 检测并脱敏密码字段（不区分大小写）
+        // 匹配模式: password=xxx, pwd=xxx, newPassword=xxx 等
+        if (argStr.toLowerCase().contains("password") || argStr.toLowerCase().contains("pwd")) {
+            // 使用正则表达式替换密码值
+            argStr = argStr.replaceAll("(?i)(password|pwd|newPassword|oldPassword)\\s*=\\s*[^,}\\]]+", "$1=***");
+        }
+        
+        return argStr;
     }
 
 }

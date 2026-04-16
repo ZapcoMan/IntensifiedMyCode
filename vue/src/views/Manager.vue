@@ -15,11 +15,11 @@
         <!-- 主题切换按钮 -->
         <el-button 
           class="theme-toggle-btn" 
-          :icon="darkMode ? Moon : Sunny" 
+          :icon="themeStore.darkMode ? Moon : Sunny" 
           circle 
           size="default"
           @click="toggleTheme"
-          :title="darkMode ? '切换到亮色主题' : '切换到暗色主题'"
+          :title="themeStore.darkMode ? '切换到亮色主题' : '切换到暗色主题'"
         />
         
         <el-dropdown>
@@ -102,11 +102,16 @@
 
 <script setup>
 import router from "@/router/index.js";
-import { reactive, onMounted, ref, watch } from "vue";
-import { getMenuByRole } from '@/api/menu.js'
-import { validateToken } from '@/api/auth.js'  // 新增导入
-import { ElMessage } from 'element-plus'  // 新增导入
+import { onMounted } from "vue";
+import { useUserStore } from '@/stores/user'
+import { useThemeStore } from '@/stores/theme'
+import { useMenuStore } from '@/stores/menu'
 import { House, User, EditPen, SwitchButton, ArrowDown, Monitor, Setting, Document, Moon, Sunny } from '@element-plus/icons-vue'
+
+// 使用 Pinia stores
+const userStore = useUserStore()
+const themeStore = useThemeStore()
+const menuStore = useMenuStore()
 
 // 图标映射
 const iconMap = {
@@ -117,23 +122,24 @@ const iconMap = {
   'document': Document
 }
 
-const data = reactive({
-  user: JSON.parse(localStorage.getItem('code_user') || "{}"),
-  menus: [],
-  openedMenus: [],
-  isCollapse: false
-})
-
-// 主题状态
-const darkMode = ref(localStorage.getItem('theme') === 'dark')
+// 从 store 获取数据
+const data = {
+  user: userStore.user,
+  menus: menuStore.menus,
+  openedMenus: menuStore.openedMenus,
+  darkMode: themeStore.darkMode
+}
 
 const logout = () => {
-  localStorage.removeItem('code_user')
+  userStore.clearUser()
+  menuStore.clearMenus()
   location.href = '/login'
 }
 
 const updateUser = () => {
-  data.user = JSON.parse(localStorage.getItem("code_user") || '{}')
+  // 重新从 localStorage 加载用户信息
+  const userData = JSON.parse(localStorage.getItem('code_user') || '{}')
+  userStore.setUser(userData)
 }
 
 // 获取图标组件
@@ -147,89 +153,25 @@ const getIconComponent = (iconName) => {
 
 // 切换主题
 const toggleTheme = () => {
-  const newTheme = darkMode.value ? 'light' : 'dark';
-  darkMode.value = !darkMode.value;
-  document.documentElement.setAttribute('data-theme', newTheme);
-  localStorage.setItem('theme', newTheme);
-}
-
-// 验证token是否有效
-const checkTokenValidity = async () => {
-  try {
-    const response = await validateToken()
-    if (response.code !== 20000) {
-      // Token无效，清除本地存储并重定向到登录页面
-      localStorage.removeItem('code_user')
-      localStorage.removeItem('token')
-      router.push('/login')
-      ElMessage.error('登录已过期，请重新登录')
-      return false
-    }
-    return true
-  } catch (error) {
-    // 验证失败，可能是网络问题或token已过期
-    localStorage.removeItem('code_user')
-    localStorage.removeItem('token')
-    router.push('/login')
-    ElMessage.error('登录已过期，请重新登录')
-    return false
-  }
-}
-
-// 定期检查token有效性（每10分钟检查一次）
-const startTokenCheckInterval = () => {
-  setInterval(async () => {
-    const user = localStorage.getItem('code_user')
-    if (user) {
-      await checkTokenValidity()
-    }
-  }, 10 * 60 * 1000) // 10分钟
+  themeStore.toggleTheme()
 }
 
 // 加载菜单
 const loadMenu = async () => {
-  try {
-    const role = data.user.role || 'USER'
-    const res = await getMenuByRole(role)
-    if (res.code === 20000) {
-      data.menus = res.data  // 修改为使用 res.data 而不是 res.dataMap
-      // 初始化展开的菜单
-      data.openedMenus = data.menus.map(menu => menu.id.toString())
-    } else {
-      console.error('获取菜单失败:', res.message)
-    }
-  } catch (error) {
-    console.error('获取菜单时发生错误:', error)
-  }
+  const role = userStore.userRole || 'USER'
+  await menuStore.loadMenus(role)
 }
 
-onMounted(async () => {
-  const user = localStorage.getItem('code_user')
-  if (user) {
-    const isValid = await checkTokenValidity()
-    if (isValid) {
-      loadMenu()
-      // 应用保存的主题
-      const savedTheme = localStorage.getItem('theme') || 'light'
-      document.documentElement.setAttribute('data-theme', savedTheme)
-      darkMode.value = savedTheme === 'dark'
-      // 启动定期检查
-      startTokenCheckInterval()
-    }
-  } else {
+onMounted(() => {
+  if (userStore.isLoggedIn) {
+    // 路由守卫已经验证过 token，这里直接加载菜单
     loadMenu()
-    // 应用保存的主题
-    const savedTheme = localStorage.getItem('theme') || 'light'
-    document.documentElement.setAttribute('data-theme', savedTheme)
-    darkMode.value = savedTheme === 'dark'
+    // 初始化主题
+    themeStore.initTheme()
+  } else {
+    // 如果没有用户信息，重定向到登录页
+    router.push('/login')
   }
-})
-
-// 监听主题变化
-watch(darkMode, (newVal) => {
-  const theme = newVal ? 'dark' : 'light';
-  document.documentElement.setAttribute('data-theme', theme);
-  localStorage.setItem('theme', theme);
 })
 
 </script>

@@ -66,7 +66,7 @@ CREATE TABLE `users` (
 
 -- 初始账户：admin1，密码 123456 的 MD5Hex = e10adc3949ba59abbe56e057f20f883e
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `avatar`, `email`, `phone`, `status`, `created_at`) VALUES
-    (1, 'admin1', 'e10adc3949ba59abbe56e057f20f883e', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg', NULL, NULL, 'ENABLE', '2026-01-09 18:53:09');
+    (1, 'admin1', '$10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg', NULL, NULL, 'ENABLE', '2026-01-09 18:53:09');
 
 -- ----------------------------
 -- 4. user_roles 用户-角色关联表（依赖 users 和 role）

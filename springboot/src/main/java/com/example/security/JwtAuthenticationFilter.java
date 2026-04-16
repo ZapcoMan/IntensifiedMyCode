@@ -9,8 +9,6 @@ import com.example.enums.RoleEnum;
 import com.example.exception.CustomerException;
 import com.example.service.AdminService;
 import com.example.service.UserService;
-import com.example.strategy.Context.RoleStrategyContext;
-import com.example.strategy.RoleStrategy;
 import com.example.utils.RedisUtils;
 import jakarta.annotation.Resource;
 import jakarta.servlet.FilterChain;
@@ -29,9 +27,6 @@ import java.util.*;
 
 @Component
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
-
-    @Resource
-    private RoleStrategyContext roleStrategyContext;
 
     @Resource
     private AdminService adminService;

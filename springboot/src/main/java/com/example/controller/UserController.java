@@ -112,7 +112,7 @@ public class UserController {
     @GetMapping("/selectAll")
     public R selectAll() {
         List<User> userList = userServiceImpl.selectAll();
-        return  R.ok();
+        return  R.ok().data("userList", userList);
     }
 
     /**

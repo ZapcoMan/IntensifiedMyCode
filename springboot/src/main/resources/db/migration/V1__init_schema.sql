@@ -30,8 +30,8 @@ CREATE TABLE `audit_log` (
 -- ----------------------------
 -- 2. role 角色表（先建，user_roles 依赖它）
 -- ----------------------------
-DROP TABLE IF EXISTS `role`;
-CREATE TABLE `role` (
+DROP TABLE IF EXISTS `roles`;
+CREATE TABLE `roles` (
     `id` int(11) NOT NULL AUTO_INCREMENT,
     `code` varchar(30) NOT NULL COMMENT '角色编码（如 SUPER_ADMIN / STUDENT）',
     `name` varchar(50) NOT NULL COMMENT '角色名称',
@@ -40,7 +40,7 @@ CREATE TABLE `role` (
     UNIQUE INDEX `role_code_unique`(`code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
-INSERT INTO `role` (`id`, `code`, `name`, `description`) VALUES
+INSERT INTO `roles` (`id`, `code`, `name`, `description`) VALUES
     (1, 'SUPER_ADMIN', '超级管理员', '拥有全部管理权限'),
     (2, 'DEPT_ADMIN', '部门管理员', '管理部门内部事务'),
     (3, 'CLUB_LEADER', '社团负责人', '管理社团相关事务'),

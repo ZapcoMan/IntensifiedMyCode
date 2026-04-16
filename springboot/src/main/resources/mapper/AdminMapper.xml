@@ -40,6 +40,7 @@
         LEFT JOIN roles r ON ur.role_id = r.id
         WHERE u.username = #{username}
         GROUP BY u.id
+        LIMIT 1
     </select>
 
 
@@ -64,6 +65,7 @@
         LEFT JOIN roles r ON ur.role_id = r.id
         WHERE u.id = #{id}
         GROUP BY u.id
+        LIMIT 1
     </select>
 
     <!-- 根据用户ID查询用户角色 -->

@@ -10,8 +10,8 @@
         <!-- 查询普通用户角色的用户信息 -->
         SELECT u.*, GROUP_CONCAT(r.code) AS role
         FROM users u
-        LEFT JOIN user_roles ur ON u.id = ur.user_id
-        LEFT JOIN roles r ON ur.role_id = r.id
+        INNER JOIN user_roles ur ON u.id = ur.user_id
+        INNER JOIN roles r ON ur.role_id = r.id
         <where>
             <!-- 只查询普通用户角色的用户 -->
             r.code = 'USER'

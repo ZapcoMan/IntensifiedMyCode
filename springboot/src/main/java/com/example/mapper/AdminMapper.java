@@ -1,12 +1,15 @@
 package com.example.mapper;
 
 import com.example.entity.Admin;
+import org.apache.ibatis.annotations.Mapper;
+
 import java.util.List;
 
 /**
  * AdminMapper接口定义了管理员数据访问层的方法
  * 这些方法用于对管理员表进行基本的CRUD操作
  */
+@Mapper
 public interface AdminMapper {
 
     /**

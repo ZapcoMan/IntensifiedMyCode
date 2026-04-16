@@ -41,22 +41,34 @@ public class DistributedLockUtils {
     }
 
     /**
-     * 释放分布式锁
+     * 释放分布式锁（使用 Lua 脚本保证原子性）
      *
      * @param lockKey 锁的键
      * @param requestId 请求ID，用于验证是否是锁的持有者
      * @return 是否释放锁成功
      */
     public boolean releaseLock(String lockKey, String requestId) {
-        // 简化版的解锁逻辑：直接删除键，不做原子性检查
         String key = LOCK_PREFIX + lockKey;
-        String currentValue = (String) redisTemplate.opsForValue().get(key);
         
-        if (currentValue != null && currentValue.equals(requestId)) {
-            redisTemplate.delete(key);
-            return true;
-        }
+        // Lua 脚本：先比较 value，相等才删除，保证原子性
+        String luaScript = 
+            "if redis.call('get', KEYS[1]) == ARGV[1] then " +
+            "   return redis.call('del', KEYS[1]) " +
+            "else " +
+            "   return 0 " +
+            "end";
         
-        return false;
+        Long result = redisTemplate.execute(
+            (org.springframework.data.redis.core.RedisCallback<Long>) connection -> 
+                connection.eval(
+                    luaScript.getBytes(),
+                    org.springframework.data.redis.connection.ReturnType.INTEGER,
+                    1,
+                    key.getBytes(),
+                    requestId.getBytes()
+                )
+        );
+        
+        return result != null && result > 0;
     }
 }

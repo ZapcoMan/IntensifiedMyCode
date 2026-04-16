@@ -15,6 +15,7 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -36,6 +37,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Resource
     private RedisUtils redisUtils;
+
+    @Value("${jwt.secret}")
+    private String jwtSecret;
 
     // 白名单列表，这些路径不需要进行token验证
     private final static List<String> WHITE_LIST = Arrays.asList(
@@ -108,9 +112,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                 redisUtils.set(cacheKey, account, 30, java.util.concurrent.TimeUnit.MINUTES);
             }
 
-            // 使用账户密码作为密钥验证token
-            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(account.getPassword())).build();
+            // 使用固定的服务端密钥验证token签名
+            JWTVerifier verifier = JWT.require(Algorithm.HMAC256(jwtSecret)).build();
             verifier.verify(token);
+
+            // 检查token是否在黑名单中（登出或改密码后）
+            String tokenKey = "token:user:" + userId + ":" + role;
+            String storedToken = redisUtils.get(tokenKey);
+            if (storedToken == null || !storedToken.equals(token)) {
+                throw new CustomerException("401", "Token已失效，请重新登录");
+            }
 
             // 验证通过，设置Spring Security的认证信息
             UsernamePasswordAuthenticationToken authToken =

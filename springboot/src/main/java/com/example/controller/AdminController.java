@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.annotation.AuditLogRecord;
 import com.example.common.R;
 import com.example.common.ResultCodeEnum;
+import com.example.entity.Account;
 import com.example.entity.Admin;
 import com.example.service.AdminService;
 import com.example.utils.TokenUtils;
@@ -97,7 +98,8 @@ public class AdminController {
     @Operation(summary = "验证Token")
     @GetMapping("/validateToken")
     public R validateToken() {
-        if (tokenUtils.validateToken()) {
+        Account currentUser = tokenUtils.getCurrentUser();
+        if (currentUser != null) {
             return R.ok();
         } else {
             return R.error(ResultCodeEnum.TOKEN_INVALID,"Token已失效或不存在");

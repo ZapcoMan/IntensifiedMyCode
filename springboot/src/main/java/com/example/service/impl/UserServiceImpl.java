@@ -227,9 +227,12 @@ public class UserServiceImpl implements UserService {
         user.setPassword(passwordEncoder.encode(account.getNewpassword()));
         userMapper.updateById(user);
         
-        // 清除Redis中的缓存
+        // 清除Redis中的用户信息缓存
         String cacheKey = "user:info:" + currentUser.getId() + ":USER";
         redisUtils.remove(cacheKey);
+        
+        // 将旧 token 加入黑名单（改密码后旧 token 立即失效）
+        tokenUtils.removeToken(currentUser.getId().toString(), "USER");
     }
 
 }

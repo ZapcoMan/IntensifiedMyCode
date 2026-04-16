@@ -10,6 +10,7 @@ import com.example.service.AdminService;
 import com.example.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -19,7 +20,7 @@ import java.util.concurrent.TimeUnit;
 
 /**
  * Token工具类，提供Token生成和用户信息获取功能
- * 重构为标准的Spring Bean，支持依赖注入和单元测试
+ * 使用固定的服务端密钥签发 JWT，通过 Redis 黑名单机制处理改密码后旧 token 失效
  */
 @Component
 public class TokenUtils {
@@ -33,24 +34,32 @@ public class TokenUtils {
     @Resource
     private RedisUtils redisUtils;
 
+    @Value("${jwt.secret}")
+    private String jwtSecret;
+
+    @Value("${jwt.expiration-days:1}")
+    private int expirationDays;
+
     /**
-     * 生成Token
-     * @param data Token中的载荷数据，包含用户ID和角色，用"-"分隔
-     * @param sign Token的密钥，用于签名
+     * 生成Token（使用固定的服务端密钥）
+     * @param userId 用户ID
+     * @param role 用户角色
      * @return 生成的Token字符串
      */
-    public String createToken(String data, String sign) {
-        String token = JWT.create().withAudience(data)
-                .withExpiresAt(DateUtil.offsetDay(new Date(), 1))
-                .sign(Algorithm.HMAC256(sign));
+    public String createToken(String userId, String role) {
+        String audience = userId + "-" + role;
+        Date expiresAt = DateUtil.offsetDay(new Date(), expirationDays);
+        
+        // 使用固定的服务端密钥签名
+        String token = JWT.create()
+                .withAudience(audience)
+                .withExpiresAt(expiresAt)
+                .sign(Algorithm.HMAC256(jwtSecret));
 
-        // 将token存储到Redis中
+        // 将token存储到Redis中，用于登出时快速失效
         if (redisUtils != null) {
-            String[] split = data.split("-");
-            String userId = split[0];
-            String role = split[1];
             String tokenKey = "token:user:" + userId + ":" + role;
-            redisUtils.set(tokenKey, token, 1, TimeUnit.DAYS);
+            redisUtils.set(tokenKey, token, expirationDays, TimeUnit.DAYS);
         }
 
         return token;
@@ -106,20 +115,26 @@ public class TokenUtils {
     }
 
     /**
-     * 验证Token是否有效
-     * @return true 如果Token有效，false 如果Token无效或不存在
+     * 验证Token是否有效（检查是否在黑名单中）
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @param token 待验证的token
+     * @return true 如果Token有效，false 如果Token在黑名单中
      */
-    public boolean validateToken() {
-        try {
-            Account currentUser = getCurrentUser();
-            return currentUser != null;
-        } catch (Exception e) {
-            return false;
+    public boolean isTokenValid(String userId, String role, String token) {
+        if (redisUtils == null || StrUtil.isBlank(token)) {
+            return true; // Redis 不可用时不做额外校验
         }
+        
+        String tokenKey = "token:user:" + userId + ":" + role;
+        String storedToken = redisUtils.get(tokenKey);
+        
+        // 如果 Redis 中没有该 token（已登出或被加入黑名单），则无效
+        return storedToken != null && storedToken.equals(token);
     }
 
     /**
-     * 移除用户Token（登出时调用）
+     * 移除用户Token（登出或改密码时调用，加入黑名单）
      * @param userId 用户ID
      * @param role 用户角色
      */

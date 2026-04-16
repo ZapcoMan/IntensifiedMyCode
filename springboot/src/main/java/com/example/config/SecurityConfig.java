@@ -37,7 +37,12 @@ public class SecurityConfig {
                 .requestMatchers(
                         "/login", "/register",
                         "/files/upload/**", "/files/download/**",
-                        "/favicon.ico"
+                        "/favicon.ico",
+                        // Swagger UI 和 OpenAPI 文档
+                        "/swagger-ui.html",
+                        "/swagger-ui/**",
+                        "/v3/api-docs/**",
+                        "/webjars/**"
                 ).permitAll()
                 .anyRequest().authenticated()
                 .and()

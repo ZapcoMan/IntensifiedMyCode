@@ -3,6 +3,7 @@ package com.example.controller;
 import com.example.common.R;
 import com.example.entity.Menu;
 import com.example.service.MenuService;
+import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -24,6 +25,7 @@ public class MenuController {
      * @param role 用户角色
      * @return 菜单列表
      */
+    @Operation(summary = "根据角色获取菜单列表")
     @GetMapping("/getByRole")
     public R getMenuByRole(@RequestParam String role) {
         List<Menu> menus = menuService.getMenuByRole(role);
@@ -35,6 +37,7 @@ public class MenuController {
      *
      * @return 所有菜单列表
      */
+    @Operation(summary = "获取所有菜单")
     @GetMapping("/getAll")
     public R getAllMenu() {
         List<Menu> menus = menuService.getAllMenu();
@@ -47,6 +50,7 @@ public class MenuController {
      * @param id 菜单ID
      * @return 菜单对象
      */
+    @Operation(summary = "根据ID获取菜单")
     @GetMapping("/get/{id}")
     public R getMenuById(@PathVariable Integer id) {
         Menu menu = menuService.getMenuById(id);
@@ -59,6 +63,7 @@ public class MenuController {
      * @param menu 菜单对象
      * @return 操作结果
      */
+    @Operation(summary = "添加菜单")
     @PostMapping("/add")
     public R addMenu(@RequestBody Menu menu) {
         menuService.addMenu(menu);
@@ -71,6 +76,7 @@ public class MenuController {
      * @param menu 菜单对象
      * @return 操作结果
      */
+    @Operation(summary = "更新菜单")
     @PutMapping("/update")
     public R updateMenu(@RequestBody Menu menu) {
         menuService.updateMenu(menu);
@@ -83,6 +89,7 @@ public class MenuController {
      * @param id 菜单ID
      * @return 操作结果
      */
+    @Operation(summary = "删除菜单")
     @DeleteMapping("/delete/{id}")
     public R deleteMenu(@PathVariable Integer id) {
         menuService.deleteMenu(id);

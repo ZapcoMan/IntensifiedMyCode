@@ -46,10 +46,16 @@
 
     <!-- 定义一个更新方法，id为updateById -->
     <update id="updateById">
-        <!-- 更新users表中的数据 -->
-        update `users` set username = #{username}, password = #{password}, name = #{name},
-        avatar = #{avatar}, email = #{email}, phone = #{phone}, status = #{status}
-        <!-- 根据id进行条件更新 -->
+        update `users`
+        <set>
+            <if test="username != null">username = #{username},</if>
+            <if test="password != null and password != ''">password = #{password},</if>
+            <if test="name != null">name = #{name},</if>
+            <if test="avatar != null">avatar = #{avatar},</if>
+            <if test="email != null">email = #{email},</if>
+            <if test="phone != null">phone = #{phone},</if>
+            <if test="status != null">status = #{status},</if>
+        </set>
         where id = #{id}
     </update>
 

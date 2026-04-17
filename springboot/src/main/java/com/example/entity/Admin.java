@@ -14,4 +14,7 @@ public class Admin extends Account {
     
     // 电话
     private String phone;
+    
+    // 状态
+    private String status;
 }

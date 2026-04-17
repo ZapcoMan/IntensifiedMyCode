@@ -226,7 +226,7 @@ public class UserServiceImpl implements UserService {
      */
     public void updatePassword(Account account) {
         //判断新密码和旧密码是否相等
-        if(!account.getNewpassword().equals(account.getNew2password())){
+        if(!account.getNewpassword().equals(account.getNewPasswordConfirm())){
             throw  new CustomerException("500","你两次输入的密码不一致");
         }
         // 判断原密码是否正确（使用 BCrypt 验证）

@@ -45,9 +45,18 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private String jwtSecret;
 
     // 白名单列表，这些路径不需要进行token验证
+    // 与 SecurityConfig 保持一致
     private final static List<String> WHITE_LIST = Arrays.asList(
             "/login", "/register",
-            "/files/upload/", "/files/download/", "/favicon.ico"
+            "/files/download/",
+            "/favicon.ico",
+            // Swagger UI 和 OpenAPI 文档
+            "/swagger-ui.html",
+            "/swagger-ui/",
+            "/v3/api-docs/",
+            "/webjars/",
+            "/files/upload/",       // ← 加这两个
+            "/files/wang/upload/"
     );
 
     /**

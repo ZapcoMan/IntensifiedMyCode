@@ -54,7 +54,9 @@ const updatePassword = () => {
         if (res.code === 20000) {
           ElMessage.success('修改成功')
           setTimeout(() => {
+            // 清理用户信息和 token
             localStorage.removeItem('code_user')
+            localStorage.removeItem('token')
             location.href = '/login'
           }, 500)
         } else {

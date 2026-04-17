@@ -56,7 +56,7 @@ public class Account {
     /**
      * 新密码的再次确认，确保用户在修改密码时正确无误地输入新密码
      */
-    private String new2password;
+    private String newPasswordConfirm;
 
 
     public Account(String username, String password, String role) {

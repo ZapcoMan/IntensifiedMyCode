@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import jakarta.annotation.Resource;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -40,6 +41,7 @@ public class AuditLogController {
      * @param limit 限制获取的日志数量，默认为20条
      * @return 返回最近的审计日志列表
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "获取最近的审计日志")
     @AuditLogRecord(action = "获取最近的审计日志" ,resource = "审计日志")
     @GetMapping("/recent")

@@ -19,7 +19,6 @@ import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.ValueSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Arrays;
 import java.util.List;
@@ -368,7 +367,7 @@ class UserServiceImplTest extends TestBase {
         Account account = new Account();
         account.setPassword("123456");
         account.setNewpassword("newpass123");
-        account.setNew2password("differentpass");
+        account.setNewPasswordConfirm("differentpass");
 
         // When & Then
         CustomerException exception = assertThrows(CustomerException.class, () -> {

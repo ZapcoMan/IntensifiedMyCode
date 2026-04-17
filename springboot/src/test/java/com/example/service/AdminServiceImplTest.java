@@ -343,7 +343,7 @@ class AdminServiceImplTest extends TestBase {
         Account account = new Account();
         account.setPassword("123456");
         account.setNewpassword("newpass123");
-        account.setNew2password("differentpass");
+        account.setNewPasswordConfirm("differentpass");
 
         // When & Then
         CustomerException exception = assertThrows(CustomerException.class, () -> {

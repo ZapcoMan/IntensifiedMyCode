@@ -5,6 +5,7 @@ import com.example.entity.Menu;
 import com.example.service.MenuService;
 import io.swagger.v3.oas.annotations.Operation;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -25,6 +26,7 @@ public class MenuController {
      * @param role 用户角色
      * @return 菜单列表
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "根据角色获取菜单列表")
     @GetMapping("/getByRole")
     public R getMenuByRole(@RequestParam String role) {
@@ -37,6 +39,7 @@ public class MenuController {
      *
      * @return 所有菜单列表
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "获取所有菜单")
     @GetMapping("/getAll")
     public R getAllMenu() {
@@ -63,6 +66,7 @@ public class MenuController {
      * @param menu 菜单对象
      * @return 操作结果
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "添加菜单")
     @PostMapping("/add")
     public R addMenu(@RequestBody Menu menu) {
@@ -76,6 +80,7 @@ public class MenuController {
      * @param menu 菜单对象
      * @return 操作结果
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "更新菜单")
     @PutMapping("/update")
     public R updateMenu(@RequestBody Menu menu) {
@@ -89,6 +94,7 @@ public class MenuController {
      * @param id 菜单ID
      * @return 操作结果
      */
+    @PostAuthorize("hasRole('SUPER_ADMIN')")
     @Operation(summary = "删除菜单")
     @DeleteMapping("/delete/{id}")
     public R deleteMenu(@PathVariable Integer id) {

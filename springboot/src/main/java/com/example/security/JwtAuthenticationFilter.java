@@ -16,6 +16,7 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
@@ -30,9 +31,11 @@ import java.util.*;
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
     @Resource
+    @Lazy
     private AdminService adminService;
 
     @Resource
+    @Lazy
     private UserService userService;
 
     @Resource

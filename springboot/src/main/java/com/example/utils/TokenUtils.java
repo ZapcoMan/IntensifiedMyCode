@@ -11,6 +11,7 @@ import com.example.service.UserService;
 import jakarta.annotation.Resource;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
@@ -26,9 +27,11 @@ import java.util.concurrent.TimeUnit;
 public class TokenUtils {
 
     @Resource
+    @Lazy
     private AdminService adminService;
     
     @Resource
+    @Lazy
     private UserService userService;
     
     @Resource

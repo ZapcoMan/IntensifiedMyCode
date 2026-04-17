@@ -184,6 +184,9 @@ public class UserServiceImpl implements UserService {
         String token = tokenUtils.createToken(dbUser.getId().toString(), "USER");
         dbUser.setToken(token);
         
+        // ✅ 确保role字段正确设置为USER（避免GROUP_CONCAT导致的问题）
+        dbUser.setRole("USER");
+        
         // 将用户信息缓存到Redis
         String cacheKey = "user:info:" + dbUser.getId() + ":USER";
         redisUtils.set(cacheKey, dbUser, 30, java.util.concurrent.TimeUnit.MINUTES);

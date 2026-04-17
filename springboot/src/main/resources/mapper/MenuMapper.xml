@@ -19,7 +19,7 @@
     <select id="findByRole" parameterType="String" resultMap="MenuMap">
         SELECT id, name, path, parent_id, icon, order_num, role, component, status
         FROM menu
-        WHERE role = #{role} AND status = 'ENABLE'
+        WHERE (role = #{role} OR role = 'USER') AND status = 'ENABLE'
         ORDER BY order_num ASC
     </select>
 

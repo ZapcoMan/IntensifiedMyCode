@@ -176,6 +176,9 @@ public class AdminServiceImpl implements AdminService {
         String token = tokenUtils.createToken(dbAdmin.getId().toString(), "SUPER_ADMIN");
         dbAdmin.setToken(token);
         
+        // ✅ 确保role字段正确设置为SUPER_ADMIN（避免GROUP_CONCAT导致的问题）
+        dbAdmin.setRole("SUPER_ADMIN");
+        
         // 将用户信息缓存到Redis
         String cacheKey = "user:info:" + dbAdmin.getId() + ":SUPER_ADMIN";
         redisUtils.set(cacheKey, dbAdmin, 30, java.util.concurrent.TimeUnit.MINUTES);

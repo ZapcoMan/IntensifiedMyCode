@@ -66,9 +66,9 @@ CREATE TABLE `users` (
     INDEX `idx_users_status`(`status`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 初始账户：admin1，密码 admin 的 BCrypt = $10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C
+-- 初始账户：admin， BCrypt = $10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C
 INSERT INTO `users` (`id`, `username`, `password`, `name`, `avatar`, `email`, `phone`, `status`, `created_at`) VALUES
-    (1, 'admin1', '$10$n7nxVZVJaD79vAXKJDr61OlxQne2c0e3QGBVAaMQ0sWwX2zEX7g4C', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg', NULL, NULL, 'ENABLE', '2026-01-09 18:53:09');
+    (1, 'admin', '$2a$10$6ToV.KD/2X02hDC3xr3a2uDKpkkm08y9S3kg/Muui9pbflp7BRPqW', '超级管理员1', 'http://127.0.0.1:9991/files/download/1767759751403.jpg', NULL, NULL, 'ENABLE', '2026-01-09 18:53:09');
 
 -- ----------------------------
 -- 4. user_roles 用户-角色关联表（依赖 users 和 role）

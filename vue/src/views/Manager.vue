@@ -53,12 +53,12 @@
       <aside class="sidebar">
         <el-menu 
           router 
-          :default-openeds="data.openedMenus" 
+          :default-openeds="menuStore.openedMenus" 
           :default-active="router.currentRoute.value.path" 
           class="side-menu"
           :collapse="isCollapse"
         >
-          <template v-for="menu in data.menus" :key="menu.id">
+          <template v-for="menu in menuStore.menus" :key="menu.id">
             <el-menu-item v-if="!menu.children || menu.children.length === 0" :index="menu.path">
               <el-icon v-if="menu.icon">
                 <component :is="getIconComponent(menu.icon)" />

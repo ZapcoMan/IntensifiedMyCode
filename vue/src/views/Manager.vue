@@ -24,9 +24,9 @@
         
         <el-dropdown>
           <div class="user-info">
-            <img v-if="data.user?.avatar" class="user-avatar" :src="data.user?.avatar" alt="Avatar">
+            <img v-if="userStore.user?.avatar" class="user-avatar" :src="userStore.user.avatar" alt="Avatar">
             <img v-else class="user-avatar" src="https://cube.elemecdn.com/3/7c/3ea6beec64369c2642b92c6726f1epng.png" alt="Default Avatar">
-            <span class="user-name">{{ data.user?.name }}</span>
+            <span class="user-name">{{ userStore.user?.name }}</span>
             <el-icon class="arrow-down"><ArrowDown /></el-icon>
           </div>
           <template #dropdown>

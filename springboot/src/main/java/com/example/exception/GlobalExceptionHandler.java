@@ -1,6 +1,7 @@
 package com.example.exception;
 
 import com.example.common.R;
+import org.springframework.security.access.AccessDeniedException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -45,5 +46,13 @@ public class GlobalExceptionHandler {
         // 返回自定义异常错误信息
         return R.error(Integer.valueOf(e.getCode()), e.getMsg());
     }
+
+
+    @ExceptionHandler(AccessDeniedException.class)
+    @ResponseBody
+    public R handleAccessDenied(AccessDeniedException e) {
+        return R.error(403, "权限不足，无权访问该资源");
+    }
+
 
 }

@@ -140,9 +140,36 @@ public class FileController {
     @AuditLogRecord(action = "文件下载", resource = "文件")
     @GetMapping("/download/{fileName}")
     public R download(@PathVariable String fileName, HttpServletResponse response) throws Exception {
-        // 找到文件的位置
+        // 1. 安全检查：防止路径穿越攻击
+        if (fileName == null || fileName.isEmpty()) {
+            throw new CustomerException("500", "文件名不能为空");
+        }
+        
+        // 2. 检查是否包含危险字符（..、/、\）
+        if (fileName.contains("..") || fileName.contains("/") || fileName.contains("\\")) {
+            log.warn("检测到可疑的文件名: " + fileName + "，拒绝访问");
+            throw new CustomerException("500", "非法的文件名");
+        }
+        
+        // 3. 只允许合法的文件名字符（字母、数字、下划线、中划线、点）
+        if (!fileName.matches("^[a-zA-Z0-9_\\-]+\\.[a-zA-Z0-9]+$")) {
+            log.warn("文件名格式不合法: " + fileName);
+            throw new CustomerException("500", "文件名格式不合法");
+        }
+        
+        // 4. 找到文件的位置
         String filePath = fileUploadConfig.getFilePath();  // 获取配置的文件路径
         String realPath = filePath + fileName;  //  D:\IdeaProjects\mycode\files\xxx.jpg
+        
+        // 5. 额外安全检查：确保解析后的真实路径在允许的目录内
+        java.io.File uploadDir = new java.io.File(filePath).getCanonicalFile();
+        java.io.File targetFile = new java.io.File(realPath).getCanonicalFile();
+        
+        if (!targetFile.getPath().startsWith(uploadDir.getPath())) {
+            log.error("路径穿越攻击检测: 目标文件 " + targetFile.getPath() + " 不在上传目录 " + uploadDir.getPath() + " 内");
+            throw new CustomerException("500", "非法的文件访问");
+        }
+        
         boolean exist = FileUtil.exist(realPath);
         if (!exist) {
             log.error("文件不存在: " + realPath);

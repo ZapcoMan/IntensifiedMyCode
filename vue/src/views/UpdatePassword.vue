@@ -25,7 +25,13 @@ import {ElMessage} from "element-plus";
 import request from "@/utils/request.js";
 
 const data = reactive({
-  user: JSON.parse(localStorage.getItem('code_user') || "{}"),
+  user: {
+    id: JSON.parse(localStorage.getItem('code_user') || "{}").id,
+    role: JSON.parse(localStorage.getItem('code_user') || "{}").role,
+    password: '',
+    newpassword: '',
+    new2password: ''
+  },
   rules:{
     password: [
       { required: true, message: '请填写原密码', trigger: 'blur' }

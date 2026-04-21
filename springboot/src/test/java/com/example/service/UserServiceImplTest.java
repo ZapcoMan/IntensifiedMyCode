@@ -247,7 +247,12 @@ class UserServiceImplTest extends TestBase {
         when(userMapper.selectByUsername("testuser")).thenReturn(testUser);
         when(passwordEncoder.matches(anyString(), anyString())).thenReturn(true);
         when(redisUtils.set(anyString(), any(User.class), anyLong(), any(TimeUnit.class))).thenReturn(true);
-        when(tokenUtils.createToken(anyString(), anyString())).thenReturn("mock_token_123");
+        
+        // Mock createTokens 返回双Token
+        java.util.Map<String, String> mockTokens = new java.util.HashMap<>();
+        mockTokens.put("accessToken", "mock_access_token_123");
+        mockTokens.put("refreshToken", "mock_refresh_token_456");
+        when(tokenUtils.createTokens(anyString(), anyString())).thenReturn(mockTokens);
 
         // When
         User result = userService.login(loginAccount);
@@ -256,8 +261,8 @@ class UserServiceImplTest extends TestBase {
         assertNotNull(result);
         assertNotNull(result.getToken());
         assertEquals("testuser", result.getUsername());
-        verify(redisUtils, times(1)).set(anyString(), any(User.class), eq(30L), eq(TimeUnit.MINUTES));
-        verify(tokenUtils, times(1)).createToken(anyString(), anyString());
+        verify(redisUtils, times(1)).set(anyString(), any(User.class), eq(1L), eq(TimeUnit.HOURS));
+        verify(tokenUtils, times(1)).createTokens(anyString(), anyString());
     }
 
     @Test

@@ -425,4 +425,110 @@ class UserServiceImplTest extends TestBase {
         assertNotNull(role);
         assertTrue(role.length() > 0);
     }
+
+    @Test
+    @DisplayName("添加用户 - 用户名为空")
+    void testAdd_UsernameBlank() {
+        // Given
+        User newUser = new User();
+        newUser.setUsername("");
+        newUser.setName("测试用户");
+        newUser.setPassword("123456");
+
+        // When & Then
+        CustomerException exception = assertThrows(CustomerException.class, () -> {
+            userService.add(newUser);
+        });
+        
+        assertEquals("用户名不能为空", exception.getMsg());
+        verify(userMapper, never()).insert(any(User.class));
+    }
+
+    @Test
+    @DisplayName("添加用户 - 使用默认密码")
+    void testAdd_WithDefaultPassword() {
+        // Given
+        User newUser = new User();
+        newUser.setUsername("newuser");
+        newUser.setName("新用户");
+        // 不设置密码，应该使用默认密码 "123456"
+
+        when(userMapper.selectByUsername("newuser")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("USER")).thenReturn(2);
+
+        // When
+        userService.add(newUser);
+
+        // Then
+        verify(userMapper, times(1)).insert(any(User.class));
+        verify(passwordEncoder, times(1)).encode("123456");
+        assertEquals("USER", newUser.getRole());
+    }
+
+    @Test
+    @DisplayName("添加用户 - 名称为空时使用用户名")
+    void testAdd_NameBlankUseUsername() {
+        // Given
+        User newUser = new User();
+        newUser.setUsername("testuser");
+        newUser.setName("");  // 名称为空
+        newUser.setPassword("123456");
+
+        when(userMapper.selectByUsername("testuser")).thenReturn(null);
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$mocked_hash");
+        when(userRoleMapper.selectIdByCode("USER")).thenReturn(2);
+
+        // When
+        userService.add(newUser);
+
+        // Then
+        verify(userMapper, times(1)).insert(any(User.class));
+        assertEquals("testuser", newUser.getName());  // 应该使用用户名作为名称
+    }
+
+    @Test
+    @DisplayName("批量删除用户 - 空列表")
+    void testDeleteBatch_EmptyList() {
+        // Given
+        List<Integer> ids = Arrays.asList();
+
+        // When
+        userService.deleteBatch(ids);
+
+        // Then
+        verify(userMapper, never()).deleteById(anyInt());
+        verify(redisUtils, never()).remove(anyString());
+    }
+
+    @Test
+    @DisplayName("分页查询用户 - 第一页")
+    void testSelectPage_FirstPage() {
+        // Given
+        List<User> userList = Arrays.asList(testUser);
+        when(userMapper.selectAll(any(User.class))).thenReturn(userList);
+
+        // When
+        PageInfo<User> pageInfo = userService.selectPage(1, 10, new User());
+
+        // Then
+        assertNotNull(pageInfo);
+        assertEquals(1, pageInfo.getList().size());
+        assertEquals("testuser", pageInfo.getList().get(0).getUsername());
+    }
+
+    @Test
+    @DisplayName("分页查询用户 - 大页码")
+    void testSelectPage_LargePageNum() {
+        // Given
+        List<User> userList = Arrays.asList();
+        when(userMapper.selectAll(any(User.class))).thenReturn(userList);
+
+        // When
+        PageInfo<User> pageInfo = userService.selectPage(999, 10, new User());
+
+        // Then
+        assertNotNull(pageInfo);
+        assertTrue(pageInfo.getList().isEmpty());  // 空列表
+    }
 }

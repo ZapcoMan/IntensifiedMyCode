@@ -93,7 +93,7 @@ class WebControllerTest extends TestBase {
         // Given
         Account account = new Account();
         account.setUsername("admin");
-        account.setPassword("123456");
+        account.setPassword("admin");
         account.setRole("SUPER_ADMIN");
 
         Account mockAdmin = new Account();

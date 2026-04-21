@@ -13,6 +13,7 @@ import jakarta.annotation.Resource;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * 用户控制器类，处理与用户相关的RESTful API请求
@@ -105,33 +106,34 @@ public class UserController {
     }
 
     /**
-     * 刷新AccessToken（使用RefreshToken）
+     * 刷新Token（使用RefreshToken换取新的一对Token）
      *
      * @param account 包含userId、role和refreshToken的信息
-     * @return 返回新的AccessToken
+     * @return 返回新的AccessToken和RefreshToken
      */
-    @Operation(summary = "刷新AccessToken")
-    @PostMapping("/refreshToken")
-    public R refreshToken(@RequestBody Account account) {
+    @Operation(summary = "刷新Token")
+    @PostMapping("/refresh")
+    public R refresh(@RequestBody Account account) {
         try {
-            // 验证RefreshToken是否有效
-            boolean isValid = tokenUtils.isRefreshTokenValid(
-                account.getId().toString(), 
-                account.getRole(), 
-                account.getRefreshToken()
-            );
+            String userId = account.getId().toString();
+            String role = account.getRole();
+            String oldRefreshToken = account.getRefreshToken();
+            
+            // 1. 验证RefreshToken是否有效
+            boolean isValid = tokenUtils.isRefreshTokenValid(userId, role, oldRefreshToken);
             
             if (!isValid) {
                 return R.error(ResultCodeEnum.TOKEN_INVALID, "RefreshToken已失效，请重新登录");
             }
             
-            // 生成新的AccessToken
-            String newAccessToken = tokenUtils.createAccessToken(
-                account.getId().toString(), 
-                account.getRole()
-            );
+            // 2. 删除旧的双Token
+            tokenUtils.removeTokens(userId, role);
             
-            return R.success(newAccessToken);
+            // 3. 生成新的一对Token
+            Map<String, String> newTokens = tokenUtils.createTokens(userId, role);
+            
+            // 4. 返回新的Token对
+            return R.success(newTokens);
         } catch (Exception e) {
             return R.error("Token刷新失败: " + e.getMessage());
         }

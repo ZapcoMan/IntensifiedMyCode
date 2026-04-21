@@ -87,8 +87,8 @@ request.interceptors.response.use(
                 
                 // ✅ 根据用户角色调用不同的刷新接口
                 const refreshUrl = userInfo.role === 'SUPER_ADMIN' 
-                    ? `${baseURL}/admin/refreshToken` 
-                    : `${baseURL}/user/refreshToken`
+                    ? `${baseURL}/admin/refresh` 
+                    : `${baseURL}/user/refresh`
                 
                 // 调用刷新接口
                 const refreshResponse = await axios.post(refreshUrl, {
@@ -98,15 +98,16 @@ request.interceptors.response.use(
                 })
                 
                 if (refreshResponse.data.code === 20000) {
-                    // 刷新成功，保存新AccessToken
-                    const newAccessToken = refreshResponse.data.data
-                    localStorage.setItem('token', newAccessToken)
+                    // 刷新成功，保存新的双Token
+                    const newTokens = refreshResponse.data.data
+                    localStorage.setItem('token', newTokens.accessToken)
+                    localStorage.setItem('refreshToken', newTokens.refreshToken)
                     
                     // 通知所有等待的请求
-                    onRefreshed(newAccessToken)
+                    onRefreshed(newTokens.accessToken)
                     
                     // 重试原请求
-                    originalRequest.headers['token'] = newAccessToken
+                    originalRequest.headers['token'] = newTokens.accessToken
                     return request(originalRequest)
                 } else {
                     // 刷新失败，跳转登录

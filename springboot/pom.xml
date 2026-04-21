@@ -138,6 +138,13 @@
 			<artifactId>flyway-mysql</artifactId>
 		</dependency>
 
+		<!-- ********** Bucket4j + Redis 限流 ********** -->
+		<dependency>
+			<groupId>com.bucket4j</groupId>
+			<artifactId>bucket4j-redis</artifactId>
+			<version>8.7.0</version>
+		</dependency>
+
 	</dependencies>
 
 	<build>

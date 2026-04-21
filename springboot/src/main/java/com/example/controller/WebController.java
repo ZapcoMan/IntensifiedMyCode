@@ -1,6 +1,7 @@
 package com.example.controller;
 
 import com.example.annotation.AuditLogRecord;
+import com.example.annotation.RateLimit;
 import com.example.common.R;
 import com.example.entity.Account;
 import com.example.entity.User;
@@ -41,6 +42,7 @@ public class WebController {
      */
     @Operation(summary = "登录")
     @AuditLogRecord(action = "登录", resource = "用户")
+    @RateLimit(keyPrefix = "login", limitType = RateLimit.LimitType.IP, capacity = 5, refillRate = 5, timeWindow = 60, message = "登录尝试过于频繁，请1分钟后再试")
     @PostMapping("/login")
     public R login(@RequestBody Account account) {
         // 使用策略模式根据用户角色调用不同的登录方法
@@ -56,6 +58,7 @@ public class WebController {
      */
     @Operation(summary = "用户注册")
     @AuditLogRecord(action = "用户注册", resource = "用户")
+    @RateLimit(keyPrefix = "register", limitType = RateLimit.LimitType.IP, capacity = 3, refillRate = 3, timeWindow = 60, message = "注册请求过于频繁，请1分钟后再试")
     @PostMapping("/register")
     public R register(@RequestBody Account account) {
         // 强制设置角色为USER，确保不能注册管理员账户

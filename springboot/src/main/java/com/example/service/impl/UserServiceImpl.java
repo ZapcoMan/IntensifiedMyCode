@@ -17,6 +17,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.annotation.Resource;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserServiceImpl implements UserService {
@@ -167,7 +168,7 @@ public class UserServiceImpl implements UserService {
      * 用户登录
      *
      * @param account 用户账号信息
-     * @return 登录成功的用户信息
+     * @return 登录成功的用户信息（包含双Token）
      * @throws CustomerException 如果账号不存在或密码错误，则抛出异常
      */
     public User login(Account account) {
@@ -180,16 +181,18 @@ public class UserServiceImpl implements UserService {
         if (!passwordEncoder.matches(account.getPassword(), dbUser.getPassword())) {
             throw new CustomerException("账号或密码错误");
         }
-        // 创建token并返回给前端
-        String token = tokenUtils.createToken(dbUser.getId().toString(), "USER");
-        dbUser.setToken(token);
+        
+        // ✅ 生成双Token（AccessToken + RefreshToken）
+        Map<String, String> tokens = tokenUtils.createTokens(dbUser.getId().toString(), "USER");
+        dbUser.setToken(tokens.get("accessToken")); // 主token设为AccessToken
+        dbUser.setRefreshToken(tokens.get("refreshToken")); // 新增字段存储RefreshToken
         
         // ✅ 确保role字段正确设置为USER（避免GROUP_CONCAT导致的问题）
         dbUser.setRole("USER");
         
-        // 将用户信息缓存到Redis
+        // 将用户信息缓存到Redis（延长缓存时间至1小时）
         String cacheKey = "user:info:" + dbUser.getId() + ":USER";
-        redisUtils.set(cacheKey, dbUser, 30, java.util.concurrent.TimeUnit.MINUTES);
+        redisUtils.set(cacheKey, dbUser, 1, java.util.concurrent.TimeUnit.HOURS);
         
         // 返回登录成功的用户信息
         return dbUser;
@@ -244,7 +247,7 @@ public class UserServiceImpl implements UserService {
         redisUtils.remove(cacheKey);
         
         // 将旧 token 加入黑名单（改密码后旧 token 立即失效）
-        tokenUtils.removeToken(currentUser.getId().toString(), "USER");
+        tokenUtils.removeTokens(currentUser.getId().toString(), "USER");
     }
 
 }

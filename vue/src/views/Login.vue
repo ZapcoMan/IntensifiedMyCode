@@ -81,9 +81,15 @@ const login = () => {
     if (valid) {
       request.post('/login', data.form).then(res => {
         if (res.code === 20000) {
-          // 使用 Pinia store 保存用户信息和 token
+          // ✅ 使用 Pinia store 保存用户信息和双Token
           userStore.setUser(res.data || {})
-          userStore.setToken(res.data.token)
+          userStore.setToken(res.data.token) // AccessToken
+          
+          // ✅ 保存RefreshToken到localStorage
+          if (res.data.refreshToken) {
+            localStorage.setItem('refreshToken', res.data.refreshToken)
+          }
+          
           ElMessage.success('登录成功')
           router.push('/manager/index')
         } else {

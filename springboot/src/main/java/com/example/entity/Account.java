@@ -39,9 +39,14 @@ public class Account {
     private String name;
 
     /**
-     * 用户令牌，通常用于维持用户登录状态或API访问权限
+     * 用户令牌，通常用于维持用户登录状态或API访问权限（AccessToken）
      */
     private String token;
+
+    /**
+     * 刷新令牌，用于在AccessToken过期后获取新的AccessToken（RefreshToken）
+     */
+    private String refreshToken;
 
     /**
      * 用户头像的URL地址，用于展示用户的个性化信息

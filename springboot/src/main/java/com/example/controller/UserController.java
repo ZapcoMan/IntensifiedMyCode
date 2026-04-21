@@ -105,6 +105,39 @@ public class UserController {
     }
 
     /**
+     * 刷新AccessToken（使用RefreshToken）
+     *
+     * @param account 包含userId、role和refreshToken的信息
+     * @return 返回新的AccessToken
+     */
+    @Operation(summary = "刷新AccessToken")
+    @PostMapping("/refreshToken")
+    public R refreshToken(@RequestBody Account account) {
+        try {
+            // 验证RefreshToken是否有效
+            boolean isValid = tokenUtils.isRefreshTokenValid(
+                account.getId().toString(), 
+                account.getRole(), 
+                account.getRefreshToken()
+            );
+            
+            if (!isValid) {
+                return R.error(ResultCodeEnum.TOKEN_INVALID, "RefreshToken已失效，请重新登录");
+            }
+            
+            // 生成新的AccessToken
+            String newAccessToken = tokenUtils.createAccessToken(
+                account.getId().toString(), 
+                account.getRole()
+            );
+            
+            return R.success(newAccessToken);
+        } catch (Exception e) {
+            return R.error("Token刷新失败: " + e.getMessage());
+        }
+    }
+
+    /**
      * 查询所有用户信息
      *
      * @return 返回所有用户信息列表

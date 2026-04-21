@@ -129,7 +129,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             verifier.verify(token);
 
             // 检查token是否在黑名单中（登出或改密码后）
-            String tokenKey = "token:user:" + userId + ":" + role;
+            String tokenKey = "token:access:" + userId + ":" + role;
             String storedToken = redisUtils.get(tokenKey);
             if (storedToken == null || !storedToken.equals(token)) {
                 throw new CustomerException("401", "Token已失效，请重新登录");

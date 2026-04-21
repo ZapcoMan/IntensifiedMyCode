@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class AdminServiceImpl implements AdminService {
@@ -153,7 +154,7 @@ public class AdminServiceImpl implements AdminService {
      * 管理员登录方法
      *
      * @param account 包含用户名和密码的账户信息
-     * @return 登录成功的管理员对象
+     * @return 登录成功的管理员对象（包含双Token）
      * @throws CustomerException 如果账号不存在或密码错误，则抛出此异常
      */
     public Admin login(Account account) {
@@ -172,16 +173,17 @@ public class AdminServiceImpl implements AdminService {
             throw new CustomerException("账号或密码错误");
         }
 
-        // 创建token并返回给前端
-        String token = tokenUtils.createToken(dbAdmin.getId().toString(), "SUPER_ADMIN");
-        dbAdmin.setToken(token);
+        // ✅ 生成双Token（AccessToken + RefreshToken）
+        Map<String, String> tokens = tokenUtils.createTokens(dbAdmin.getId().toString(), "SUPER_ADMIN");
+        dbAdmin.setToken(tokens.get("accessToken")); // 主token设为AccessToken
+        dbAdmin.setRefreshToken(tokens.get("refreshToken")); // 新增字段存储RefreshToken
         
         // ✅ 确保role字段正确设置为SUPER_ADMIN（避免GROUP_CONCAT导致的问题）
         dbAdmin.setRole("SUPER_ADMIN");
         
-        // 将用户信息缓存到Redis
+        // 将用户信息缓存到Redis（延长缓存时间至1小时）
         String cacheKey = "user:info:" + dbAdmin.getId() + ":SUPER_ADMIN";
-        redisUtils.set(cacheKey, dbAdmin, 30, java.util.concurrent.TimeUnit.MINUTES);
+        redisUtils.set(cacheKey, dbAdmin, 1, java.util.concurrent.TimeUnit.HOURS);
 
         // 返回登录成功的管理员对象
         return dbAdmin;
@@ -216,6 +218,6 @@ public class AdminServiceImpl implements AdminService {
         redisUtils.remove(cacheKey);
         
         // 将旧 token 加入黑名单（改密码后旧 token 立即失效）
-        tokenUtils.removeToken(currentUser.getId().toString(), "SUPER_ADMIN");
+        tokenUtils.removeTokens(currentUser.getId().toString(), "SUPER_ADMIN");
     }
 }

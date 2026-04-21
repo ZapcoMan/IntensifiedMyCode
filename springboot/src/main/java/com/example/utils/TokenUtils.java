@@ -16,7 +16,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
-import java.util.Date;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 
 /**
@@ -40,18 +40,21 @@ public class TokenUtils {
     @Value("${jwt.secret}")
     private String jwtSecret;
 
-    @Value("${jwt.expiration-days:1}")
-    private int expirationDays;
+    @Value("${jwt.access-token-expiration-minutes:30}")
+    private int accessTokenExpirationMinutes;
+
+    @Value("${jwt.refresh-token-expiration-days:7}")
+    private int refreshTokenExpirationDays;
 
     /**
-     * 生成Token（使用固定的服务端密钥）
+     * 生成AccessToken（短期令牌，用于接口访问）
      * @param userId 用户ID
      * @param role 用户角色
-     * @return 生成的Token字符串
+     * @return AccessToken字符串
      */
-    public String createToken(String userId, String role) {
-        String audience = userId + "-" + role;
-        Date expiresAt = DateUtil.offsetDay(new Date(), expirationDays);
+    public String createAccessToken(String userId, String role) {
+        String audience = userId + "-" + role + "-access";
+        Date expiresAt = DateUtil.offsetMinute(new Date(), accessTokenExpirationMinutes);
         
         // 使用固定的服务端密钥签名
         String token = JWT.create()
@@ -59,13 +62,51 @@ public class TokenUtils {
                 .withExpiresAt(expiresAt)
                 .sign(Algorithm.HMAC256(jwtSecret));
 
-        // 将token存储到Redis中，用于登出时快速失效
+        // 将AccessToken存储到Redis中，用于登出时快速失效
         if (redisUtils != null) {
-            String tokenKey = "token:user:" + userId + ":" + role;
-            redisUtils.set(tokenKey, token, expirationDays, TimeUnit.DAYS);
+            String tokenKey = "token:access:" + userId + ":" + role;
+            redisUtils.set(tokenKey, token, accessTokenExpirationMinutes, TimeUnit.MINUTES);
         }
 
         return token;
+    }
+
+    /**
+     * 生成RefreshToken（长期令牌，用于续期）
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @return RefreshToken字符串
+     */
+    public String createRefreshToken(String userId, String role) {
+        String audience = userId + "-" + role + "-refresh";
+        Date expiresAt = DateUtil.offsetDay(new Date(), refreshTokenExpirationDays);
+        
+        // 使用固定的服务端密钥签名
+        String token = JWT.create()
+                .withAudience(audience)
+                .withExpiresAt(expiresAt)
+                .sign(Algorithm.HMAC256(jwtSecret));
+
+        // 将RefreshToken存储到Redis中
+        if (redisUtils != null) {
+            String tokenKey = "token:refresh:" + userId + ":" + role;
+            redisUtils.set(tokenKey, token, refreshTokenExpirationDays, TimeUnit.DAYS);
+        }
+
+        return token;
+    }
+
+    /**
+     * 生成双Token（AccessToken + RefreshToken）
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @return Map包含accessToken和refreshToken
+     */
+    public Map<String, String> createTokens(String userId, String role) {
+        Map<String, String> tokens = new HashMap<>();
+        tokens.put("accessToken", createAccessToken(userId, role));
+        tokens.put("refreshToken", createRefreshToken(userId, role));
+        return tokens;
     }
 
     /**
@@ -118,18 +159,18 @@ public class TokenUtils {
     }
 
     /**
-     * 验证Token是否有效（检查是否在黑名单中）
+     * 验证AccessToken是否有效（检查是否在黑名单中）
      * @param userId 用户ID
      * @param role 用户角色
      * @param token 待验证的token
      * @return true 如果Token有效，false 如果Token在黑名单中
      */
-    public boolean isTokenValid(String userId, String role, String token) {
+    public boolean isAccessTokenValid(String userId, String role, String token) {
         if (redisUtils == null || StrUtil.isBlank(token)) {
             return true; // Redis 不可用时不做额外校验
         }
         
-        String tokenKey = "token:user:" + userId + ":" + role;
+        String tokenKey = "token:access:" + userId + ":" + role;
         String storedToken = redisUtils.get(tokenKey);
         
         // 如果 Redis 中没有该 token（已登出或被加入黑名单），则无效
@@ -137,15 +178,39 @@ public class TokenUtils {
     }
 
     /**
-     * 移除用户Token（登出或改密码时调用，加入黑名单）
+     * 验证RefreshToken是否有效
+     * @param userId 用户ID
+     * @param role 用户角色
+     * @param refreshToken 待验证的refreshToken
+     * @return true 如果RefreshToken有效，false 如果无效
+     */
+    public boolean isRefreshTokenValid(String userId, String role, String refreshToken) {
+        if (redisUtils == null || StrUtil.isBlank(refreshToken)) {
+            return false;
+        }
+        
+        String tokenKey = "token:refresh:" + userId + ":" + role;
+        String storedToken = redisUtils.get(tokenKey);
+        
+        return storedToken != null && storedToken.equals(refreshToken);
+    }
+
+    /**
+     * 移除用户所有Token（登出或改密码时调用，加入黑名单）
      * @param userId 用户ID
      * @param role 用户角色
      */
-    public void removeToken(String userId, String role) {
+    public void removeTokens(String userId, String role) {
         if (redisUtils != null) {
-            String tokenKey = "token:user:" + userId + ":" + role;
-            redisUtils.remove(tokenKey);
+            // 删除AccessToken
+            String accessTokenKey = "token:access:" + userId + ":" + role;
+            redisUtils.remove(accessTokenKey);
+            
+            // 删除RefreshToken
+            String refreshTokenKey = "token:refresh:" + userId + ":" + role;
+            redisUtils.remove(refreshTokenKey);
 
+            // 删除用户信息缓存
             String cacheKey = "user:info:" + userId + ":" + role;
             redisUtils.remove(cacheKey);
         }

@@ -5,6 +5,7 @@ export const useUserStore = defineStore('user', () => {
   // 状态
   const user = ref(JSON.parse(localStorage.getItem('code_user') || '{}'))
   const token = ref(localStorage.getItem('token') || '')
+  const refreshToken = ref(localStorage.getItem('refreshToken') || '')
   
   // 计算属性
   const isLoggedIn = computed(function() { return !!token.value && !!user.value.id })
@@ -22,11 +23,18 @@ export const useUserStore = defineStore('user', () => {
     localStorage.setItem('token', tokenValue)
   }
   
+  function setRefreshToken(refreshTokenValue) {
+    refreshToken.value = refreshTokenValue
+    localStorage.setItem('refreshToken', refreshTokenValue)
+  }
+  
   function clearUser() {
     user.value = {}
     token.value = ''
+    refreshToken.value = ''
     localStorage.removeItem('code_user')
     localStorage.removeItem('token')
+    localStorage.removeItem('refreshToken')
   }
   
   function updateUserField(field, value) {
@@ -39,11 +47,13 @@ export const useUserStore = defineStore('user', () => {
   return {
     user,
     token,
+    refreshToken,
     isLoggedIn,
     userRole,
     userName,
     setUser,
     setToken,
+    setRefreshToken,
     clearUser,
     updateUserField
   }
